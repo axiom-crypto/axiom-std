@@ -9,7 +9,6 @@ program.name("axiom-std").usage("axiom-std CLI");
 program.command("readCircuit")
     .description("Read and compile a circuit")
     .argument("<circuitPath>", "path to the typescript circuit file")
-    .argument("<inputs>", "inputs to the circuit")
     .argument("<providerUri>", "provider to use")
     .action(compile);
 

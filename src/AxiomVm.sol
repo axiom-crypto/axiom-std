@@ -168,17 +168,15 @@ contract AxiomVm is Test {
     /**
      * @dev Compiles a circuit using the Axiom CLI via FFI
      * @param _circuitPath path to the circuit file
-     * @param input path to the input file
      * @return querySchema
      */
-    function readCircuit(string memory _circuitPath, bytes memory input) public returns (bytes32 querySchema) {
-        string[] memory cli = new string[](6);
+    function readCircuit(string memory _circuitPath) public returns (bytes32 querySchema) {
+        string[] memory cli = new string[](5);
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
         cli[2] = "readCircuit";
         cli[3] = _circuitPath;
-        cli[4] = vm.toString(input);
-        cli[5] = vm.rpcUrl(urlOrAlias);
+        cli[4] = vm.rpcUrl(urlOrAlias);
         bytes memory axiomOutput = vm.ffi(cli);
 
         string memory artifact = string(axiomOutput);

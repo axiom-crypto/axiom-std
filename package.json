@@ -11,8 +11,8 @@
   "author": "Intrinsic Technologies",
   "license": "MIT",
   "dependencies": {
-    "@axiom-crypto/circuit": "^2.0.3",
-    "@axiom-crypto/client": "2.0.3",
+    "@axiom-crypto/circuit": "2.0.4-rc.0",
+    "@axiom-crypto/client": "2.0.4-rc.0",
     "@axiom-crypto/core": "^2.3.4",
     "commander": "^11.1.0",
     "dotenv": "^16.3.1",

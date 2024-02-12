@@ -26,7 +26,7 @@ contract AxiomStdTest is AxiomTest {
 
         defaultInput =
             Input({ blockNumber: 4_205_938, _address: uint256(uint160(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b)) });
-        querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts", abi.encode(defaultInput));
+        querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts");
         averageBalance = new AverageBalance(axiomV2QueryAddress, uint64(block.chainid), querySchema);
 
         callbackExtraData = bytes("");

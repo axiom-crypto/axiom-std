@@ -5,7 +5,6 @@ import { getAbi, getInputs, getSolidityType } from "./utils";
 
 export const compile = async (
     circuitPath: string,
-    inputs: string,
     providerUri: string,
 ) => {
     let circuitFunction = "circuit";
@@ -19,10 +18,8 @@ export const compile = async (
         inputSchema: f.inputSchema,
     })
 
-    const circuitInputs = getInputs(inputs, f.inputSchema);
-
     try {
-        const res = await circuit.mockCompile(circuitInputs);
+        const res = await circuit.mockCompile(f.defaultInputs);
         const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT\n${f.circuit.toString()}`;
         const encoder = new TextEncoder();
         const circuitBuild = encoder.encode(circuitFn);
