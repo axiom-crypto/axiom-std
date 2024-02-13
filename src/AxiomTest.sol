@@ -9,7 +9,7 @@ import {AxiomVm, Query, Axiom, QueryArgs, FulfillCallbackArgs} from "./AxiomVm.s
 import { IAxiomV2Core } from "@axiom-crypto/v2-periphery/interfaces/core/IAxiomV2Core.sol";
 import { IAxiomV2Query } from "@axiom-crypto/v2-periphery/interfaces/query/IAxiomV2Query.sol";
 import { IAxiomV2Client } from "@axiom-crypto/v2-periphery/interfaces/client/IAxiomV2Client.sol";
-import { AxiomV2Addresses } from "@axiom-crypto/v2-periphery/client/AxiomV2Addresses.sol";
+import { AxiomV2Addresses } from "./AxiomV2Addresses.sol";
 
 // ⭐️ TEST
 /// @title AxiomTest

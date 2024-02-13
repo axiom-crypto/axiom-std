@@ -86,21 +86,21 @@ contract AverageBalanceTest is AxiomTest {
     }
 
     AverageBalance public averageBalance;
-    AxiomInput public defaultInput;
+    AxiomInput public input;
     bytes32 public querySchema;
 
     function setUp() public {
         _createSelectForkAndSetupAxiom("sepolia", 5_103_100);
 
-        defaultInput =
+        input =
             AxiomInput({ blockNumber: 4_205_938, _address: address(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b) });
-        querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts", abi.encode(defaultInput));
+        querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts");
         averageBalance = new AverageBalance(axiomV2QueryAddress, uint64(block.chainid), querySchema);
     }
 
     function test_simple_example() public {
         // create a query into Axiom with default parameters
-        Query memory q = query(querySchema, abi.encode(defaultInput), address(averageBalance));
+        Query memory q = query(querySchema, abi.encode(input), address(averageBalance));
 
         // send the query to Axiom
         q.send();

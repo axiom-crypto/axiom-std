@@ -4,6 +4,44 @@ var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
 
+// dist/compile.js
+var require_compile = __commonJS({
+  "dist/compile.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.compile = void 0;
+    var js_12 = require("@axiom-crypto/circuit/js");
+    var utils_12 = require("@axiom-crypto/circuit/cliHandler/utils");
+    var compile = async (circuitPath, providerUri2) => {
+      let circuitFunction = "circuit";
+      const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
+      const provider2 = (0, utils_12.getProvider)(providerUri2);
+      const circuit2 = new js_12.AxiomBaseCircuit({
+        f: f.circuit,
+        mock: true,
+        provider: provider2,
+        shouldTime: false,
+        inputSchema: f.inputSchema
+      });
+      try {
+        const res = await circuit2.mockCompile(f.defaultInputs);
+        const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT
+${f.circuit.toString()}`;
+        const encoder = new TextEncoder();
+        const circuitBuild = encoder.encode(circuitFn);
+        const build = {
+          ...res,
+          circuit: Buffer.from(circuitBuild).toString("base64")
+        };
+        console.log(JSON.stringify(build));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    exports2.compile = compile;
+  }
+});
+
 // dist/utils.js
 var require_utils = __commonJS({
   "dist/utils.js"(exports2) {
@@ -106,46 +144,6 @@ var require_utils = __commonJS({
   }
 });
 
-// dist/compile.js
-var require_compile = __commonJS({
-  "dist/compile.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.compile = void 0;
-    var js_12 = require("@axiom-crypto/circuit/js");
-    var utils_12 = require("@axiom-crypto/circuit/cliHandler/utils");
-    var utils_22 = require_utils();
-    var compile = async (circuitPath, inputs2, providerUri2) => {
-      let circuitFunction = "circuit";
-      const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
-      const provider2 = (0, utils_12.getProvider)(providerUri2);
-      const circuit2 = new js_12.AxiomBaseCircuit({
-        f: f.circuit,
-        mock: true,
-        provider: provider2,
-        shouldTime: false,
-        inputSchema: f.inputSchema
-      });
-      const circuitInputs2 = (0, utils_22.getInputs)(inputs2, f.inputSchema);
-      try {
-        const res = await circuit2.mockCompile(circuitInputs2);
-        const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT
-${f.circuit.toString()}`;
-        const encoder = new TextEncoder();
-        const circuitBuild = encoder.encode(circuitFn);
-        const build = {
-          ...res,
-          circuit: Buffer.from(circuitBuild).toString("base64")
-        };
-        console.log(JSON.stringify(build));
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    exports2.compile = compile;
-  }
-});
-
 // dist/prove.js
 var require_prove = __commonJS({
   "dist/prove.js"(exports, module) {
@@ -231,6 +229,6 @@ var compile_1 = require_compile();
 var prove_1 = require_prove();
 var program = new commander_1.Command("axiom-std");
 program.name("axiom-std").usage("axiom-std CLI");
-program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<inputs>", "inputs to the circuit").argument("<providerUri>", "provider to use").action(compile_1.compile);
+program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<providerUri>", "provider to use").action(compile_1.compile);
 program.command("prove").description("Prove a circuit").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<providerUri>", "provider to use").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").action(prove_1.prove);
 program.parseAsync(process.argv);

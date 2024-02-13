@@ -19,13 +19,19 @@ export interface CircuitInputs {
   address: CircuitValue;
 }
 
+/// Default inputs used for compilation.
+export const defaultInputs = {
+  "blockNumber": 4205938,
+  "address": "0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b"
+}
+
 // The function name `circuit` is searched for by default by our Axiom CLI; if you decide to 
 // change the function name, you'll also need to ensure that you also pass the Axiom CLI flag 
 // `-f <circuitFunctionName>` for it to work
 export const circuit = async (inputs: CircuitInputs) => {
   // Number of samples to take. Note that this must be a constant value and NOT an input because the size of 
   // the circuit must be known at compile time.
-  const samples = 8; 
+  const samples = 8;
 
   // Number of blocks between each sample.
   const spacing = 900;
