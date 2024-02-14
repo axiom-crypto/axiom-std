@@ -99,13 +99,17 @@ export const getInputs = (inputs: string, inputSchema: string): any => {
     const inputSchemaJson = JSON.parse(inputSchema);
     const keys = Object.keys(inputSchemaJson);
     const abi = getAbi();
+
     const rawInputs: any[] = decodeAbiParameters(abi, inputs as `0x${string}`);
 
     const circuitInputs: any = {};
     for (let i = 0; i < keys.length; i++) {
         // if (keys[i] !== abi[i].name) throw new Error(`Input key ${keys[i]} does not match ABI name ${abi[i].name}`);
-        circuitInputs[keys[i]] = rawInputs[i].toString();
+        if (Array.isArray(rawInputs[i])) {
+            circuitInputs[keys[i]] = rawInputs[i].map((x: any) => x.toString());
+        } else {
+            circuitInputs[keys[i]] = rawInputs[i].toString();
+        }
     }
-
     return circuitInputs;
 }

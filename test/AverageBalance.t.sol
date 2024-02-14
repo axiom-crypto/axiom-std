@@ -20,8 +20,7 @@ contract AverageBalanceTest is AxiomTest {
     function setUp() public {
         _createSelectForkAndSetupAxiom("sepolia", 5_103_100);
 
-        input =
-            AxiomInput({ blockNumber: 4_205_938, _address: address(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b) });
+        input = AxiomInput({ blockNumber: 4_205_938, _address: address(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b) });
         querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts");
         averageBalance = new AverageBalance(axiomV2QueryAddress, uint64(block.chainid), querySchema);
     }
@@ -34,7 +33,7 @@ contract AverageBalanceTest is AxiomTest {
         // send the query to Axiom
         q.send();
 
-        // prank fulfillment of the query, returning the Axiom results 
+        // prank fulfillment of the query, returning the Axiom results
         bytes32[] memory results = q.prankFulfill();
 
         // parse Axiom results and verify length is as expected
@@ -57,9 +56,8 @@ contract AverageBalanceTest is AxiomTest {
             overrideAxiomQueryFee: 0
         });
 
-        // create a query into Axiom with custom `callbackExtraData` and `feeData` 
-        Query memory q =
-            query(querySchema, abi.encode(input), address(averageBalance), callbackExtraData, feeData);
+        // create a query into Axiom with custom `callbackExtraData` and `feeData`
+        Query memory q = query(querySchema, abi.encode(input), address(averageBalance), callbackExtraData, feeData);
 
         // send the query to Axiom
         q.send();

@@ -136,7 +136,11 @@ var require_utils = __commonJS({
       const rawInputs = (0, viem_1.decodeAbiParameters)(abi, inputs2);
       const circuitInputs2 = {};
       for (let i = 0; i < keys.length; i++) {
-        circuitInputs2[keys[i]] = rawInputs[i].toString();
+        if (Array.isArray(rawInputs[i])) {
+          circuitInputs2[keys[i]] = rawInputs[i].map((x) => x.toString());
+        } else {
+          circuitInputs2[keys[i]] = rawInputs[i].toString();
+        }
       }
       return circuitInputs2;
     };
