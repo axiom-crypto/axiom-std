@@ -16,13 +16,13 @@ import {
 /// These should be the _variable_ inputs to your circuit. Constants can be hard-coded into the circuit itself.
 export interface CircuitInputs {
   blockNumber: CircuitValue;
-  _address: CircuitValue;
+  address: CircuitValue;
 }
 
 /// Default inputs used for compilation.
 export const defaultInputs = {
   "blockNumber": 4205938,
-  "_address": "0x8018fe32fCFd3d166E8b4c4E37105318A84BA11c"
+  "address": "0x8018fe32fCFd3d166E8b4c4E37105318A84BA11c"
 }
 
 // The function name `circuit` is searched for by default by our Axiom CLI; if you decide to 
@@ -48,7 +48,7 @@ export const circuit = async (inputs: CircuitInputs) => {
   let sampledAccounts = new Array(samples);
   for (let i = 0; i < samples; i++) {
     const sampleBlockNumber: CircuitValue = sub(inputs.blockNumber, mul(spacing, i));
-    const account = getAccount(sampleBlockNumber, inputs._address);
+    const account = getAccount(sampleBlockNumber, inputs.address);
     sampledAccounts[i] = account;
   }
 
@@ -65,6 +65,6 @@ export const circuit = async (inputs: CircuitInputs) => {
   // We call `addToCallback` on all values that we would like to be passed to our contract after the circuit has
   // been proven in ZK. The values can then be handled by our contract once the prover calls the callback function.
   addToCallback(inputs.blockNumber);
-  addToCallback(inputs._address);
+  addToCallback(inputs.address);
   addToCallback(average);
 };

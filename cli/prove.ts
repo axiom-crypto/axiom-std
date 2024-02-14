@@ -1,7 +1,7 @@
 import path from 'path';
 import { AxiomBaseCircuit } from "@axiom-crypto/circuit/js";
 import { getFunctionFromTs, getProvider, readInputs, saveJsonToFile } from "@axiom-crypto/circuit/cliHandler/utils";
-import { getAbi, getInputs, getSolidityType } from './utils';
+import { getInputs } from './utils';
 import { decodeAbiParameters } from 'viem';
 import { AxiomSdkCore } from "@axiom-crypto/core";
 import { buildSendQuery } from "@axiom-crypto/client";

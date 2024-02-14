@@ -1,7 +1,5 @@
 import { AxiomBaseCircuit } from "@axiom-crypto/circuit/js";
-import { getFunctionFromTs, getProvider, readInputs, saveJsonToFile } from "@axiom-crypto/circuit/cliHandler/utils";
-import { decodeAbiParameters, encodeAbiParameters } from 'viem';
-import { getAbi, getInputs, getSolidityType } from "./utils";
+import { getFunctionFromTs, getProvider } from "@axiom-crypto/circuit/cliHandler/utils";
 
 export const compile = async (
     circuitPath: string,

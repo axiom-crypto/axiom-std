@@ -47,28 +47,13 @@ var require_utils = __commonJS({
   "dist/utils.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.getInputs = exports2.getAbi = exports2.findStructDefinition = exports2.findFilesWithAxiomInput = exports2.getSolidityType = void 0;
+    exports2.getInputs = exports2.getAbis = exports2.findStructDefinition = exports2.findFilesWithAxiomInput = void 0;
     var tslib_1 = require("tslib");
     var fs_1 = tslib_1.__importDefault(require("fs"));
     var path_1 = tslib_1.__importDefault(require("path"));
     var viem_1 = require("viem");
-    var getSolidityType = (type) => {
-      switch (type) {
-        case "CircuitValue":
-          return "uint256";
-        case "CircuitValue256":
-          return "uint256";
-        case "CircuitValue[]":
-          return "uint256[]";
-        case "CircuitValue256[]":
-          return "uint256[]";
-        default:
-          throw new Error(`Unknown type ${type}`);
-      }
-    };
-    exports2.getSolidityType = getSolidityType;
     var findFilesWithAxiomInput = (directory) => {
-      let file = null;
+      let files = [];
       function traverseDirectory(dir) {
         const entries = fs_1.default.readdirSync(dir);
         for (const entry of entries) {
@@ -79,14 +64,13 @@ var require_utils = __commonJS({
           } else if (stat.isFile() && entry.endsWith(".json")) {
             const fileContent = fs_1.default.readFileSync(entryPath, "utf8");
             if (fileContent.includes('.AxiomInput"')) {
-              file = entryPath;
-              return;
+              files.push(entryPath);
             }
           }
         }
       }
       traverseDirectory(directory);
-      return file;
+      return files;
     };
     exports2.findFilesWithAxiomInput = findFilesWithAxiomInput;
     var findStructDefinition = (jsonFile) => {
@@ -109,42 +93,72 @@ var require_utils = __commonJS({
       return traverseObject(jsonData);
     };
     exports2.findStructDefinition = findStructDefinition;
-    var getAbi = () => {
-      const jsonFile = (0, exports2.findFilesWithAxiomInput)(process.cwd());
-      if (jsonFile === null) {
+    var getAbis = () => {
+      const jsonFiles = (0, exports2.findFilesWithAxiomInput)(process.cwd());
+      if (jsonFiles.length === 0) {
         throw new Error("Could not find json file with AxiomInput");
       }
-      const structDefinition = (0, exports2.findStructDefinition)(jsonFile);
-      if (structDefinition === null) {
-        throw new Error(`Could not find struct definition in file ${jsonFile}`);
+      const structDefinitions = jsonFiles.map(exports2.findStructDefinition).filter((x) => x !== null);
+      if (structDefinitions.length === 0) {
+        throw new Error(`Could not find struct definition`);
       }
-      const abiComponents = [];
-      for (const member of structDefinition.members) {
-        const type = member.typeDescriptions.typeString;
-        if (type === void 0) {
-          throw new Error(`Could not find type for member ${member.name}`);
+      const getAbiFromStructDefinition = (structDefinition) => {
+        const abiComponents = [];
+        for (const member of structDefinition.members) {
+          const type = member.typeDescriptions.typeString;
+          if (type === void 0) {
+            throw new Error(`Could not find type for member ${member.name}`);
+          }
+          abiComponents.push({ name: member.name, type });
         }
-        abiComponents.push({ name: member.name, type });
-      }
-      const abi = [{
-        "name": "circuit",
-        "type": "tuple",
-        "components": abiComponents
-      }];
-      return abi;
+        const abi = [{
+          "name": "circuit",
+          "type": "tuple",
+          "components": abiComponents
+        }];
+        return abi;
+      };
+      const abis = structDefinitions.map(getAbiFromStructDefinition);
+      return abis;
     };
-    exports2.getAbi = getAbi;
+    exports2.getAbis = getAbis;
+    var validateAbi = (abi, inputSchema) => {
+      const inputSchemaJson = JSON.parse(inputSchema);
+      const keys = Object.keys(inputSchemaJson);
+      const values = Object.values(inputSchemaJson);
+      const abiComponents = abi[0].components;
+      if (keys.length !== abiComponents.length)
+        return false;
+      for (let i = 0; i < keys.length; i++) {
+        if (values[i].endsWith("[]") && !abiComponents[i].type.endsWith("[]"))
+          return false;
+        if (!values[i].endsWith("[]") && abiComponents[i].type.endsWith("[]"))
+          return false;
+        if (values[i].startsWith("CircuitValue256") && !(abiComponents[i].type.startsWith("uint256") || abiComponents[i].type.startsWith("bytes32")))
+          return false;
+        if ((abiComponents[i].type.startsWith("uint256") || abiComponents[i].type.startsWith("bytes32")) && !values[i].startsWith("CircuitValue256"))
+          return false;
+        if (!(abiComponents[i].type.startsWith("uint") || abiComponents[i].type.startsWith("address") || abiComponents[i].type.startsWith("bytes") || abiComponents[i].type.startsWith("bool")))
+          return false;
+      }
+      return true;
+    };
     var getInputs = (inputs2, inputSchema) => {
       const inputSchemaJson = JSON.parse(inputSchema);
       const keys = Object.keys(inputSchemaJson);
-      const abi = (0, exports2.getAbi)();
+      const abis = (0, exports2.getAbis)().filter((x) => validateAbi(x, inputSchema));
+      if (abis.length === 0) {
+        throw new Error("Could not find valid ABI");
+      }
+      const abi = abis[0];
       const rawInputs = (0, viem_1.decodeAbiParameters)(abi, inputs2)[0];
+      const abiComponents = abi[0].components;
       const circuitInputs2 = {};
       for (let i = 0; i < keys.length; i++) {
         if (Array.isArray(rawInputs[keys[i]])) {
-          circuitInputs2[keys[i]] = rawInputs[keys[i]].map((x) => x.toString());
+          circuitInputs2[keys[i]] = rawInputs[abiComponents[i].name].map((x) => x.toString());
         } else {
-          circuitInputs2[keys[i]] = rawInputs[keys[i]].toString();
+          circuitInputs2[keys[i]] = rawInputs[abiComponents[i].name].toString();
         }
       }
       return circuitInputs2;
