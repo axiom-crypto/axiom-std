@@ -104,7 +104,6 @@ library Axiom {
 /// @title AxiomVm
 /// @dev A contract that provides cheatcodes for testing the AxiomV2Query contract
 contract AxiomVm is Test {
-
     /// @dev Path to the Axiom CLI
     string CLI_PATH;
 
@@ -155,14 +154,21 @@ contract AxiomVm is Test {
         checkCli[1] = "-c";
         checkCli[2] = string(abi.encodePacked("shasum -a 256 ", CLI_PATH, " | awk '{print $1}'"));
         bytes memory sha = vm.ffi(checkCli);
-        require(keccak256(abi.encodePacked(sha)) == keccak256(abi.encodePacked(AxiomCli.CLI_SHASUM)), "Wrong CLI shasum. Make sure that there are no conflicting axiom-vm-cli.bin files in your folder.");
+        require(
+            keccak256(abi.encodePacked(sha)) == keccak256(abi.encodePacked(AxiomCli.CLI_SHASUM)),
+            "Wrong CLI shasum. Make sure that there are no conflicting axiom-vm-cli.bin files in your folder."
+        );
 
         string[] memory checkAxiomInputStruct = new string[](3);
         checkAxiomInputStruct[0] = "sh";
         checkAxiomInputStruct[1] = "-c";
-        checkAxiomInputStruct[2] = "grep -rl \"AxiomInput\\\"\" . --include \\*.json >/dev/null 2>&1 && echo 1 || echo 0";
+        checkAxiomInputStruct[2] =
+            "grep -rl \"AxiomInput\\\"\" . --include \\*.json >/dev/null 2>&1 && echo 1 || echo 0";
         bytes memory axiomInputStruct = vm.ffi(checkAxiomInputStruct);
-        require(_parseBoolean(string(axiomInputStruct)), "AxiomInput struct not found. Make sure that your circuit input struct is named AxiomInput in your test file.");
+        require(
+            _parseBoolean(string(axiomInputStruct)),
+            "AxiomInput struct not found. Make sure that your circuit input struct is named AxiomInput in your test file."
+        );
     }
 
     /**
