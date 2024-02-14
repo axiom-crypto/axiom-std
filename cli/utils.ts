@@ -68,7 +68,7 @@ export const findStructDefinition = (jsonFile: string): any | null => {
     return traverseObject(jsonData);
 }
 
-export const getAbi = (): { name: string; type: string; }[] => {
+export const getAbi = (): any => { 
     const jsonFile = findFilesWithAxiomInput(process.cwd());
 
     if (jsonFile === null) {
@@ -81,16 +81,21 @@ export const getAbi = (): { name: string; type: string; }[] => {
         throw new Error(`Could not find struct definition in file ${jsonFile}`);
     }
 
-    const abi: { name: string; type: string; }[] = [];
+    const abiComponents: { name: string; type: string; }[] = [];
 
     for (const member of structDefinition.members) {
         const type = member.typeDescriptions.typeString;
         if (type === undefined) {
             throw new Error(`Could not find type for member ${member.name}`);
         }
-        abi.push({ name: member.name, type });
+        abiComponents.push({ name: member.name, type });
     }
 
+    const abi = [{
+        "name": "circuit",
+        "type": "tuple",
+        "components": abiComponents,
+    }];
     return abi;
 
 }
@@ -99,13 +104,17 @@ export const getInputs = (inputs: string, inputSchema: string): any => {
     const inputSchemaJson = JSON.parse(inputSchema);
     const keys = Object.keys(inputSchemaJson);
     const abi = getAbi();
-    const rawInputs: any[] = decodeAbiParameters(abi, inputs as `0x${string}`);
+
+    const rawInputs: any = decodeAbiParameters(abi, inputs as `0x${string}`)[0];
 
     const circuitInputs: any = {};
     for (let i = 0; i < keys.length; i++) {
         // if (keys[i] !== abi[i].name) throw new Error(`Input key ${keys[i]} does not match ABI name ${abi[i].name}`);
-        circuitInputs[keys[i]] = rawInputs[i].toString();
+        if (Array.isArray(rawInputs[keys[i]])) {
+            circuitInputs[keys[i]] = rawInputs[keys[i]].map((x: any) => x.toString());
+        } else {
+            circuitInputs[keys[i]] = rawInputs[keys[i]].toString();
+        }
     }
-
     return circuitInputs;
 }

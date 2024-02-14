@@ -118,14 +118,19 @@ var require_utils = __commonJS({
       if (structDefinition === null) {
         throw new Error(`Could not find struct definition in file ${jsonFile}`);
       }
-      const abi = [];
+      const abiComponents = [];
       for (const member of structDefinition.members) {
         const type = member.typeDescriptions.typeString;
         if (type === void 0) {
           throw new Error(`Could not find type for member ${member.name}`);
         }
-        abi.push({ name: member.name, type });
+        abiComponents.push({ name: member.name, type });
       }
+      const abi = [{
+        "name": "circuit",
+        "type": "tuple",
+        "components": abiComponents
+      }];
       return abi;
     };
     exports2.getAbi = getAbi;
@@ -133,10 +138,14 @@ var require_utils = __commonJS({
       const inputSchemaJson = JSON.parse(inputSchema);
       const keys = Object.keys(inputSchemaJson);
       const abi = (0, exports2.getAbi)();
-      const rawInputs = (0, viem_1.decodeAbiParameters)(abi, inputs2);
+      const rawInputs = (0, viem_1.decodeAbiParameters)(abi, inputs2)[0];
       const circuitInputs2 = {};
       for (let i = 0; i < keys.length; i++) {
-        circuitInputs2[keys[i]] = rawInputs[i].toString();
+        if (Array.isArray(rawInputs[keys[i]])) {
+          circuitInputs2[keys[i]] = rawInputs[keys[i]].map((x) => x.toString());
+        } else {
+          circuitInputs2[keys[i]] = rawInputs[keys[i]].toString();
+        }
       }
       return circuitInputs2;
     };
