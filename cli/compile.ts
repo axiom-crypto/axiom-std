@@ -20,6 +20,10 @@ export const compile = async (
     try {
         const res = await circuit.mockCompile(f.defaultInputs);
         if (options.overrideQuerySchema) {
+            var re = /[0-9A-Fa-f]{6}/g;
+            if (!re.test(options.overrideQuerySchema)) {
+                throw new Error("overrideQuerySchema is not a hex string");
+            }
             res.querySchema = ("0xdeadbeef" + options.overrideQuerySchema).padEnd(66, '0').substring(0, 66);
         } 
         const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT\n${f.circuit.toString()}`;
