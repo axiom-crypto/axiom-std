@@ -83,6 +83,11 @@ contract AxiomStdTest is AxiomTest {
         axiomVm.prankOffchainCallback(args);
     }
 
+    function test_mockQuerySchema() public {
+        bytes32 mockQuerySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts", "aaaa");
+        assertEq(mockQuerySchema, bytes32(0xdeadbeefaaaa0000000000000000000000000000000000000000000000000000));
+    }
+
     // function test_compileNotMocked() public {
     //     axiomVm.setMock(false);
     //     bytes32 querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts", inputPath);
