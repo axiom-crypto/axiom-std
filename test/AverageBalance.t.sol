@@ -22,7 +22,7 @@ contract AverageBalanceTest is AxiomTest {
 
         input = AxiomInput({ blockNumber: 4_205_938, _address: address(0x8018fe32FCFd3d166e8B4c4e37105318a84ba11d) });
 
-        querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts");
+        querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts", "averageTest");
         averageBalance = new AverageBalance(axiomV2QueryAddress, uint64(block.chainid), querySchema);
     }
 

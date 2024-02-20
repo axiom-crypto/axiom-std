@@ -4,6 +4,7 @@ import { getFunctionFromTs, getProvider } from "@axiom-crypto/circuit/cliHandler
 export const compile = async (
     circuitPath: string,
     providerUri: string,
+    options: {suffix?: string }
 ) => {
     let circuitFunction = "circuit";
     const f = await getFunctionFromTs(circuitPath, circuitFunction);
@@ -18,6 +19,9 @@ export const compile = async (
 
     try {
         const res = await circuit.mockCompile(f.defaultInputs);
+        if (options.suffix) {
+            res.querySchema = ("0xdeadbeef" + options.suffix).slice(66);
+        } 
         const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT\n${f.circuit.toString()}`;
         const encoder = new TextEncoder();
         const circuitBuild = encoder.encode(circuitFn);
