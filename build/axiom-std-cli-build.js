@@ -12,7 +12,7 @@ var require_compile = __commonJS({
     exports2.compile = void 0;
     var js_12 = require("@axiom-crypto/circuit/js");
     var utils_12 = require("@axiom-crypto/circuit/cliHandler/utils");
-    var compile = async (circuitPath, providerUri2) => {
+    var compile = async (circuitPath, providerUri2, options) => {
       let circuitFunction = "circuit";
       const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
       const provider2 = (0, utils_12.getProvider)(providerUri2);
@@ -25,6 +25,9 @@ var require_compile = __commonJS({
       });
       try {
         const res = await circuit2.mockCompile(f.defaultInputs);
+        if (options.suffix) {
+          res.querySchema = ("0xdeadbeef" + options.suffix).slice(66);
+        }
         const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT
 ${f.circuit.toString()}`;
         const encoder = new TextEncoder();
@@ -252,6 +255,6 @@ var compile_1 = require_compile();
 var prove_1 = require_prove();
 var program = new commander_1.Command("axiom-std");
 program.name("axiom-std").usage("axiom-std CLI");
-program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<providerUri>", "provider to use").action(compile_1.compile);
+program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<providerUri>", "provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
 program.command("prove").description("Prove a circuit").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<providerUri>", "provider to use").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").action(prove_1.prove);
 program.parseAsync(process.argv);

@@ -10,6 +10,7 @@ program.command("readCircuit")
     .description("Read and compile a circuit")
     .argument("<circuitPath>", "path to the typescript circuit file")
     .argument("<providerUri>", "provider to use")
+    .option("-q, --override-query-schema <suffix>", "query schema")
     .action(compile);
 
 program.command("prove")

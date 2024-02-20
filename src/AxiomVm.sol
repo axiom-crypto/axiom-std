@@ -191,6 +191,28 @@ contract AxiomVm is Test {
     }
 
     /**
+     * @dev Compiles a circuit using the Axiom CLI via FFI
+     * @param _circuitPath path to the circuit file
+     * @param suffix the suffix to append to the query schema
+     * @return querySchema
+     */
+    function readCircuit(string memory _circuitPath, string memory suffix) public returns (bytes32 querySchema) {
+        string[] memory cli = new string[](7);
+        cli[0] = NODE_PATH;
+        cli[1] = CLI_PATH;
+        cli[2] = "readCircuit";
+        cli[3] = _circuitPath;
+        cli[4] = vm.rpcUrl(urlOrAlias);
+        cli[5] = "--override-query-schema";
+        cli[6] = suffix;
+        bytes memory axiomOutput = vm.ffi(cli);
+
+        string memory artifact = string(axiomOutput);
+        querySchema = bytes32(vm.parseJson(artifact, ".querySchema"));
+        compiledStrings[querySchema] = artifact;
+    }    
+
+    /**
      * @dev Generates args for the sendQuery function
      * @param querySchema the query schema
      * @param input path to the input file
