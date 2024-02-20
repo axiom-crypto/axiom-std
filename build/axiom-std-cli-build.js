@@ -25,8 +25,8 @@ var require_compile = __commonJS({
       });
       try {
         const res = await circuit2.mockCompile(f.defaultInputs);
-        if (options.suffix) {
-          res.querySchema = ("0xdeadbeef" + options.suffix).slice(66);
+        if (options.overrideQuerySchema) {
+          res.querySchema = ("0xdeadbeef" + options.overrideQuerySchema).padEnd(66, "0").substring(0, 66);
         }
         const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT
 ${f.circuit.toString()}`;
