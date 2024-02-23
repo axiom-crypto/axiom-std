@@ -132,10 +132,10 @@ var require_utils = __commonJS({
       let logString = "";
       let errorString = "";
       console.log = (...args) => {
-        logString += args.join(" ") + "\n";
+        logString += args.join(" ") + "\n  ";
       };
       console.error = (...args) => {
-        errorString += args.join(" ") + "\n";
+        errorString += args.join(" ") + "\n  ";
       };
       const restoreConsole2 = () => {
         console.log = originalConsoleLog;

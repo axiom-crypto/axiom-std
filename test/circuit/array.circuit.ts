@@ -29,6 +29,7 @@ export const defaultInputs = {
 
 export const circuit = async (inputs: CircuitInputs) => {
     let res = sum(inputs.blockNumbers);
-    log(res);
+    console.log("Sum of inputs.blockNumbers: ", res.value());
+    console.log("Input address: ", inputs.address.value().toString(16));
     addToCallback(inputs.address);
 };
