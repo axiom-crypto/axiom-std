@@ -62,7 +62,8 @@ contract AverageBalanceTest is AxiomTest {
         Query memory q = query(querySchema, abi.encode(input), address(averageBalance), callbackExtraData, feeData);
 
         // send the query to Axiom
-        q.send();
+        address caller = address(123);
+        q.send(caller);
 
         // prank fulfillment of the query, returning the Axiom results
         bytes32[] memory results = q.prankFulfill();
