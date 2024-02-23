@@ -4,5 +4,5 @@ pragma solidity ^0.8.0;
 library AxiomCli {
 
     /// @dev The SHA256 hash of the Axiom CLI binary
-    bytes public constant CLI_SHASUM = hex"9b2cdc50d6d5b9501411debd8e390f9405b032019006ecf5ee24bf751768f80e";
+    bytes public constant CLI_SHASUM = hex"0c05809efdab4a53f04bf413d6d9e1e970d6db40cdea8c8fc6975c64bad30b9d";
 }

@@ -176,6 +176,26 @@ contract AxiomVm is Test {
     }
 
     /**
+     * @dev Logs FFI logs and reverts if stderr is not empty
+     * @param logs any logs from ffi to log
+     * @param errors any errors from ffi to log
+     * @param message the revert message
+     */
+    function logOutput(string memory logs, string memory errors, string memory message) public view {
+        if(bytes(logs).length > 0) {
+            console.log("Circuit logs:");
+            console.log(logs);
+        }
+        if(bytes(errors).length > 0){
+            console.log("Circuit errors:");
+            console.log(errors);
+            revert (message);
+        }
+    }
+
+
+
+    /**
      * @dev Compiles a circuit using the Axiom CLI via FFI
      * @param _circuitPath path to the circuit file
      * @return querySchema
@@ -188,10 +208,10 @@ contract AxiomVm is Test {
         cli[3] = _circuitPath;
         cli[4] = vm.rpcUrl(urlOrAlias);
         bytes memory axiomOutput = vm.ffi(cli);
-
-        string memory artifact = string(axiomOutput);
-        querySchema = bytes32(vm.parseJson(artifact, ".querySchema"));
-        compiledStrings[querySchema] = artifact;
+        (string memory logs, string memory errors, string memory build) = abi.decode(axiomOutput, (string, string, string));
+        logOutput(logs, errors, "Circuit compilation failed");
+        querySchema = bytes32(vm.parseJson(build, ".querySchema"));
+        compiledStrings[querySchema] = build;
     }
 
     /**
@@ -210,10 +230,10 @@ contract AxiomVm is Test {
         cli[5] = "--override-query-schema";
         cli[6] = suffix;
         bytes memory axiomOutput = vm.ffi(cli);
-
-        string memory artifact = string(axiomOutput);
-        querySchema = bytes32(vm.parseJson(artifact, ".querySchema"));
-        compiledStrings[querySchema] = artifact;
+        (string memory logs, string memory errors, string memory build) = abi.decode(axiomOutput, (string, string, string));
+        logOutput(logs, errors, "Circuit compilation failed");
+        querySchema = bytes32(vm.parseJson(build, ".querySchema"));
+        compiledStrings[querySchema] = build;
     }    
 
     /**
@@ -463,7 +483,9 @@ contract AxiomVm is Test {
         cli[12] = vm.toString(msg.sender);
 
         bytes memory axiomOutput = vm.ffi(cli);
-        output = string(axiomOutput);
+        (string memory logs, string memory errors, string memory build) = abi.decode(axiomOutput, (string, string, string));
+        logOutput(logs, errors, "Circuit proving failed");
+        output = build;
     }
 
     /**

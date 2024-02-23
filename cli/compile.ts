@@ -1,11 +1,14 @@
 import { AxiomBaseCircuit } from "@axiom-crypto/circuit/js";
 import { getFunctionFromTs, getProvider } from "@axiom-crypto/circuit/cliHandler/utils";
+import { redirectConsole } from "./utils";
+import { encodeAbiParameters, parseAbiParameters } from "viem";
 
 export const compile = async (
     circuitPath: string,
     providerUri: string,
-    options: {overrideQuerySchema?: string }
+    options: { overrideQuerySchema?: string }
 ) => {
+    const { restoreConsole, getCaptures } = redirectConsole();
     let circuitFunction = "circuit";
     const f = await getFunctionFromTs(circuitPath, circuitFunction);
     const provider = getProvider(providerUri);
@@ -24,7 +27,7 @@ export const compile = async (
                 throw new Error("overrideQuerySchema is not a hex string");
             }
             res.querySchema = ("0xdeadbeef" + options.overrideQuerySchema).padEnd(66, '0').substring(0, 66);
-        } 
+        }
         const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT\n${f.circuit.toString()}`;
         const encoder = new TextEncoder();
         const circuitBuild = encoder.encode(circuitFn);
@@ -32,9 +35,16 @@ export const compile = async (
             ...res,
             circuit: Buffer.from(circuitBuild).toString('base64'),
         }
-        console.log(JSON.stringify(build));
+        const logs = getCaptures();
+        const output = encodeAbiParameters(parseAbiParameters('string x, string y, string z'), [logs.logs, logs.errors, JSON.stringify(build)])
+        restoreConsole();
+        console.log(output);
     }
     catch (e) {
         console.error(e);
+        const logs = getCaptures();
+        const output = encodeAbiParameters(parseAbiParameters('string x, string y, string z'), [logs.logs, logs.errors, ""])
+        restoreConsole();
+        console.log(output);
     }
 }

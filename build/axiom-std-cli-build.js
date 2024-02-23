@@ -4,60 +4,16 @@ var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
 
-// dist/compile.js
-var require_compile = __commonJS({
-  "dist/compile.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.compile = void 0;
-    var js_12 = require("@axiom-crypto/circuit/js");
-    var utils_12 = require("@axiom-crypto/circuit/cliHandler/utils");
-    var compile = async (circuitPath, providerUri2, options) => {
-      let circuitFunction = "circuit";
-      const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
-      const provider2 = (0, utils_12.getProvider)(providerUri2);
-      const circuit2 = new js_12.AxiomBaseCircuit({
-        f: f.circuit,
-        mock: true,
-        provider: provider2,
-        shouldTime: false,
-        inputSchema: f.inputSchema
-      });
-      try {
-        const res = await circuit2.mockCompile(f.defaultInputs);
-        if (options.overrideQuerySchema) {
-          if (!/^[A-F0-9]+$/i.test(options.overrideQuerySchema)) {
-            throw new Error("overrideQuerySchema is not a hex string");
-          }
-          res.querySchema = ("0xdeadbeef" + options.overrideQuerySchema).padEnd(66, "0").substring(0, 66);
-        }
-        const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT
-${f.circuit.toString()}`;
-        const encoder = new TextEncoder();
-        const circuitBuild = encoder.encode(circuitFn);
-        const build = {
-          ...res,
-          circuit: Buffer.from(circuitBuild).toString("base64")
-        };
-        console.log(JSON.stringify(build));
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    exports2.compile = compile;
-  }
-});
-
 // dist/utils.js
 var require_utils = __commonJS({
   "dist/utils.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.getInputs = exports2.getAbis = exports2.findStructDefinition = exports2.findFilesWithAxiomInput = void 0;
+    exports2.redirectConsole = exports2.getInputs = exports2.getAbis = exports2.findStructDefinition = exports2.findFilesWithAxiomInput = void 0;
     var tslib_1 = require("tslib");
     var fs_1 = tslib_1.__importDefault(require("fs"));
     var path_1 = tslib_1.__importDefault(require("path"));
-    var viem_1 = require("viem");
+    var viem_12 = require("viem");
     var findFilesWithAxiomInput = (directory) => {
       let files = [];
       function traverseDirectory(dir) {
@@ -157,7 +113,7 @@ var require_utils = __commonJS({
         throw new Error("Could not find valid ABI");
       }
       const abi = abis[0];
-      const rawInputs = (0, viem_1.decodeAbiParameters)(abi, inputs2)[0];
+      const rawInputs = (0, viem_12.decodeAbiParameters)(abi, inputs2)[0];
       const abiComponents = abi[0].components;
       const circuitInputs2 = {};
       for (let i = 0; i < keys.length; i++) {
@@ -170,6 +126,82 @@ var require_utils = __commonJS({
       return circuitInputs2;
     };
     exports2.getInputs = getInputs;
+    var redirectConsole = () => {
+      const originalConsoleLog = console.log;
+      const originalConsoleError = console.error;
+      let logString = "";
+      let errorString = "";
+      console.log = (...args) => {
+        logString += args.join(" ") + "\n";
+      };
+      console.error = (...args) => {
+        errorString += args.join(" ") + "\n";
+      };
+      const restoreConsole2 = () => {
+        console.log = originalConsoleLog;
+        console.error = originalConsoleError;
+      };
+      const getCaptures2 = () => ({
+        logs: logString,
+        errors: errorString
+      });
+      return { restoreConsole: restoreConsole2, getCaptures: getCaptures2 };
+    };
+    exports2.redirectConsole = redirectConsole;
+  }
+});
+
+// dist/compile.js
+var require_compile = __commonJS({
+  "dist/compile.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.compile = void 0;
+    var js_12 = require("@axiom-crypto/circuit/js");
+    var utils_12 = require("@axiom-crypto/circuit/cliHandler/utils");
+    var utils_22 = require_utils();
+    var viem_12 = require("viem");
+    var compile = async (circuitPath, providerUri2, options) => {
+      const { restoreConsole: restoreConsole2, getCaptures: getCaptures2 } = (0, utils_22.redirectConsole)();
+      let circuitFunction = "circuit";
+      const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
+      const provider2 = (0, utils_12.getProvider)(providerUri2);
+      const circuit2 = new js_12.AxiomBaseCircuit({
+        f: f.circuit,
+        mock: true,
+        provider: provider2,
+        shouldTime: false,
+        inputSchema: f.inputSchema
+      });
+      try {
+        const res = await circuit2.mockCompile(f.defaultInputs);
+        if (options.overrideQuerySchema) {
+          if (!/^[A-F0-9]+$/i.test(options.overrideQuerySchema)) {
+            throw new Error("overrideQuerySchema is not a hex string");
+          }
+          res.querySchema = ("0xdeadbeef" + options.overrideQuerySchema).padEnd(66, "0").substring(0, 66);
+        }
+        const circuitFn = `const ${f.importName} = AXIOM_CLIENT_IMPORT
+${f.circuit.toString()}`;
+        const encoder = new TextEncoder();
+        const circuitBuild = encoder.encode(circuitFn);
+        const build = {
+          ...res,
+          circuit: Buffer.from(circuitBuild).toString("base64")
+        };
+        const logs = getCaptures2();
+        const output = (0, viem_12.encodeAbiParameters)((0, viem_12.parseAbiParameters)("string x, string y, string z"), [logs.logs, logs.errors, JSON.stringify(build)]);
+        restoreConsole2();
+        console.log(output);
+      } catch (e) {
+        console.error(e);
+        const logs = getCaptures2();
+        const output = (0, viem_12.encodeAbiParameters)((0, viem_12.parseAbiParameters)("string x, string y, string z"), [logs.logs, logs.errors, ""]);
+        restoreConsole2();
+        console.log(output);
+      }
+    };
+    exports2.compile = compile;
   }
 });
 
@@ -182,10 +214,12 @@ var require_prove = __commonJS({
     var js_1 = require("@axiom-crypto/circuit/js");
     var utils_1 = require("@axiom-crypto/circuit/cliHandler/utils");
     var utils_2 = require_utils();
+    var viem_1 = require("viem");
     var core_1 = require("@axiom-crypto/core");
     var client_1 = require("@axiom-crypto/client");
     var utils_3 = require("@axiom-crypto/client/axiom/utils");
     var prove = async (compiledJson, inputs, providerUri, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
+      const { restoreConsole, getCaptures } = (0, utils_2.redirectConsole)();
       const decoder = new TextDecoder();
       const provider = (0, utils_1.getProvider)(providerUri);
       let compiled = JSON.parse(compiledJson);
@@ -242,9 +276,16 @@ var require_prove = __commonJS({
           calldata: build.calldata,
           computeResults
         };
-        console.log(JSON.stringify(query));
+        const logs = getCaptures();
+        const output = (0, viem_1.encodeAbiParameters)((0, viem_1.parseAbiParameters)("string x, string y, string z"), [logs.logs, logs.errors, JSON.stringify(query)]);
+        restoreConsole();
+        console.log(output);
       } catch (e) {
         console.error(e);
+        const logs = getCaptures();
+        const output = (0, viem_1.encodeAbiParameters)((0, viem_1.parseAbiParameters)("string x, string y, string z"), [logs.logs, logs.errors, ""]);
+        restoreConsole();
+        console.log(output);
       }
     };
     exports.prove = prove;

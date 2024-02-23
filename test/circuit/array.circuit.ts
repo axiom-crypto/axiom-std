@@ -10,7 +10,8 @@ import {
     constant,
     witness,
     getAccount,
-    sum
+    sum,
+    log
 } from "@axiom-crypto/client";
 
 export interface CircuitInputs {
@@ -27,6 +28,7 @@ export const defaultInputs = {
 }
 
 export const circuit = async (inputs: CircuitInputs) => {
-    sum(inputs.blockNumbers);
+    let res = sum(inputs.blockNumbers);
+    log(res);
     addToCallback(inputs.address);
 };

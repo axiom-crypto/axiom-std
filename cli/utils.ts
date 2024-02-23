@@ -134,3 +134,31 @@ export const getInputs = (inputs: string, inputSchema: string): any => {
     }
     return circuitInputs;
 }
+
+export const redirectConsole = () => {
+    const originalConsoleLog = console.log;
+    const originalConsoleError = console.error;
+
+    let logString = '';
+    let errorString = '';
+
+    console.log = (...args) => {
+        logString += args.join(' ') + '\n';
+    };
+
+    console.error = (...args) => {
+        errorString += args.join(' ') + '\n';
+    };
+
+    const restoreConsole = () => {
+        console.log = originalConsoleLog;
+        console.error = originalConsoleError;
+    };
+
+    const getCaptures = () => ({
+        logs: logString,
+        errors: errorString
+    });
+
+    return { restoreConsole, getCaptures };
+}
