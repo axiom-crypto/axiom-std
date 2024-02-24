@@ -107,7 +107,8 @@ abstract contract AxiomTest is Test {
             input,
             callbackTarget,
             bytes(""),
-            IAxiomV2Query.AxiomV2FeeData({ maxFeePerGas: 25 gwei, callbackGasLimit: 1_000_000, overrideAxiomQueryFee: 0 })
+            IAxiomV2Query.AxiomV2FeeData({ maxFeePerGas: 25 gwei, callbackGasLimit: 1_000_000, overrideAxiomQueryFee: 0 }),
+            msg.sender
         );
     }
 
@@ -117,12 +118,14 @@ abstract contract AxiomTest is Test {
     /// @param callbackTarget The address of the contract to send a callback to
     /// @param callbackExtraData Extra data to include in the callback
     /// @param feeData The fee data for the query
+    /// @param caller the address of the caller
     function query(
         bytes32 _querySchema,
         bytes memory input,
         address callbackTarget,
         bytes memory callbackExtraData,
-        IAxiomV2Query.AxiomV2FeeData memory feeData
+        IAxiomV2Query.AxiomV2FeeData memory feeData,
+        address caller
     ) internal view returns (Query memory) {
         return Query({
             querySchema: _querySchema,
@@ -132,7 +135,7 @@ abstract contract AxiomTest is Test {
             feeData: feeData,
             axiomVm: axiomVm,
             outputString: "",
-            caller: msg.sender
+            caller: caller
         });
     }
 }

@@ -62,12 +62,17 @@ contract AverageBalanceTest is AxiomTest {
             overrideAxiomQueryFee: 0
         });
 
-        // create a query into Axiom with custom `callbackExtraData` and `feeData`
-        Query memory q = query(querySchema, abi.encode(input), address(averageBalance), callbackExtraData, feeData);
+        // create a query into Axiom with custom `callbackExtraData`, `feeData`, and `caller`
+        address caller = address(123);
+        vm.deal(caller, 1 ether);
+        Query memory q = query(querySchema, abi.encode(input), address(averageBalance), callbackExtraData, feeData, caller);
 
         // send the query to Axiom
-        address caller = address(123);
-        q.send(caller);
+        vm.expectEmit(false, false, false, false);
+        emit QueryFeeInfoRecorded(0, address(0), 0, 0, 0, 0);
+        vm.expectEmit(true, false, false, false);
+        emit QueryInitiatedOnchain(caller, bytes32(0), 0, bytes32(0), caller, address(averageBalance), hex"");
+        q.send();
 
         // prank fulfillment of the query, returning the Axiom results
         vm.expectEmit();
