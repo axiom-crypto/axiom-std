@@ -9,6 +9,8 @@ import { AverageBalance } from "./example/AverageBalance.sol";
 contract AverageBalanceTest is AxiomTest {
     using Axiom for Query;
 
+    event AverageBalanceStored(uint256 blockNumber, address _address, uint256 averageBalance);
+
     struct AxiomInput {
         uint64 blockNumber;
         address _address;
@@ -36,6 +38,8 @@ contract AverageBalanceTest is AxiomTest {
         q.send();
 
         // prank fulfillment of the query, returning the Axiom results
+        vm.expectEmit();
+        emit AverageBalanceStored(input.blockNumber, input._address, 0);
         bytes32[] memory results = q.prankFulfill();
 
         // parse Axiom results and verify length is as expected
@@ -66,6 +70,8 @@ contract AverageBalanceTest is AxiomTest {
         q.send(caller);
 
         // prank fulfillment of the query, returning the Axiom results
+        vm.expectEmit();
+        emit AverageBalanceStored(input.blockNumber, input._address, 0);
         bytes32[] memory results = q.prankFulfill();
 
         // parse Axiom results and verify length is as expected
