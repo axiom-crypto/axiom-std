@@ -1,8 +1,8 @@
 import path from 'path';
 import { AxiomBaseCircuit } from "@axiom-crypto/circuit/js";
 import { getFunctionFromTs, getProvider, readInputs, saveJsonToFile } from "@axiom-crypto/circuit/cliHandler/utils";
-import { getInputs } from './utils';
-import { decodeAbiParameters } from 'viem';
+import { getInputs, redirectConsole } from './utils';
+import { decodeAbiParameters, encodeAbiParameters, parseAbiParameters } from 'viem';
 import { AxiomSdkCore } from "@axiom-crypto/core";
 import { buildSendQuery } from "@axiom-crypto/client";
 import { argsArrToObj } from '@axiom-crypto/client/axiom/utils';
@@ -19,7 +19,7 @@ export const prove = async (
     callbackGasLimit: string,
     caller: string,
 ) => {
-
+    const { restoreConsole, getCaptures } = redirectConsole();
     const decoder = new TextDecoder();
 
     const provider = getProvider(providerUri);
@@ -86,9 +86,16 @@ export const prove = async (
             computeResults,
         };
 
-        console.log(JSON.stringify(query));
+        const logs = getCaptures();
+        const output = encodeAbiParameters(parseAbiParameters('string x, string y, string z'), [logs.logs, logs.errors, JSON.stringify(query)])
+        restoreConsole();
+        console.log(output);
     }
     catch (e) {
         console.error(e);
+        const logs = getCaptures();
+        const output = encodeAbiParameters(parseAbiParameters('string x, string y, string z'), [logs.logs, logs.errors, ""])
+        restoreConsole();
+        console.log(output);
     }
 }

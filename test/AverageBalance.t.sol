@@ -9,6 +9,8 @@ import { AverageBalance } from "./example/AverageBalance.sol";
 contract AverageBalanceTest is AxiomTest {
     using Axiom for Query;
 
+    event AverageBalanceStored(uint256 blockNumber, address _address, uint256 averageBalance);
+
     struct AxiomInput {
         uint64 blockNumber;
         address _address;
@@ -24,7 +26,6 @@ contract AverageBalanceTest is AxiomTest {
         input = AxiomInput({ blockNumber: 4_205_938, _address: address(0x8018fe32FCFd3d166e8B4c4e37105318a84ba11d) });
 
         querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts", "aaaa");
-        console.logBytes32(querySchema);
         averageBalance = new AverageBalance(axiomV2QueryAddress, uint64(block.chainid), querySchema);
     }
 
@@ -37,6 +38,8 @@ contract AverageBalanceTest is AxiomTest {
         q.send();
 
         // prank fulfillment of the query, returning the Axiom results
+        vm.expectEmit();
+        emit AverageBalanceStored(input.blockNumber, input._address, 0);
         bytes32[] memory results = q.prankFulfill();
 
         // parse Axiom results and verify length is as expected
@@ -63,9 +66,12 @@ contract AverageBalanceTest is AxiomTest {
         Query memory q = query(querySchema, abi.encode(input), address(averageBalance), callbackExtraData, feeData);
 
         // send the query to Axiom
-        q.send();
+        address caller = address(123);
+        q.send(caller);
 
         // prank fulfillment of the query, returning the Axiom results
+        vm.expectEmit();
+        emit AverageBalanceStored(input.blockNumber, input._address, 0);
         bytes32[] memory results = q.prankFulfill();
 
         // parse Axiom results and verify length is as expected
