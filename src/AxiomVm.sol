@@ -79,18 +79,8 @@ library Axiom {
     /// @param self The query to send
     function send(Query memory self) public {
         self.outputString = self.axiomVm.getArgsAndSendQuery(
-            self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData
+            self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData, self.caller
         );
-    }
-
-    /// @dev Sends a query to Axiom
-    /// @param self The query to send
-    /// @param caller The address of the caller of the original query into Axiom
-    function send(Query memory self, address caller) public {
-        self.outputString = self.axiomVm.getArgsAndSendQuery(
-            self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData
-        );
-        self.caller = caller;
     }
 
     /// @dev Pranks a callback from Axiom
@@ -434,6 +424,7 @@ contract AxiomVm is Test {
      * @param callbackTarget the callback contract address
      * @param callbackExtraData extra data to be passed to the callback contract
      * @param feeData the fee data
+     * @param caller the address of the caller
      * @return queryString the query string
      */
     function getArgsAndSendQuery(
@@ -441,12 +432,13 @@ contract AxiomVm is Test {
         bytes memory input,
         address callbackTarget,
         bytes memory callbackExtraData,
-        IAxiomV2Query.AxiomV2FeeData memory feeData
+        IAxiomV2Query.AxiomV2FeeData memory feeData,
+        address caller
     ) public returns (string memory queryString) {
         (QueryArgs memory args, string memory _queryString) =
             sendQueryArgs(querySchema, input, callbackTarget, callbackExtraData, feeData);
         queryString = _queryString;
-        vm.prank(msg.sender);
+        vm.prank(caller);
         IAxiomV2Query(axiomV2QueryAddress).sendQuery{ value: args.value }(
             args.sourceChainId,
             args.dataQueryHash,
