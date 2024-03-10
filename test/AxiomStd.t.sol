@@ -9,13 +9,13 @@ import { IAxiomV2Query } from "@axiom-crypto/v2-periphery/interfaces/query/IAxio
 import { AverageBalance } from "./example/AverageBalance.sol";
 
 contract AxiomStdTest is AxiomTest {
-    struct Input {
+    struct AxiomInput {
         uint256 blockNumber;
         uint256 _address;
     }
 
     AverageBalance public averageBalance;
-    Input public defaultInput;
+    AxiomInput public defaultInput;
     bytes32 public querySchema;
 
     bytes public callbackExtraData;
@@ -24,8 +24,10 @@ contract AxiomStdTest is AxiomTest {
     function setUp() public {
         _createSelectForkAndSetupAxiom("sepolia", 5_103_100);
 
-        defaultInput =
-            Input({ blockNumber: 4_205_938, _address: uint256(uint160(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b)) });
+        defaultInput = AxiomInput({
+            blockNumber: 4_205_938,
+            _address: uint256(uint160(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b))
+        });
         querySchema = axiomVm.readCircuit("test/circuit/average.circuit.ts");
         averageBalance = new AverageBalance(axiomV2QueryAddress, uint64(block.chainid), querySchema);
 

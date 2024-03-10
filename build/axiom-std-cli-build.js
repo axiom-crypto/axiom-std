@@ -260,12 +260,13 @@ var require_prove = __commonJS({
             target: callbackTarget,
             extraData: callbackExtraData
           },
+          caller,
+          provider,
           options: {
             refundee: refundAddress,
             maxFeePerGas,
             callbackGasLimit: Number(callbackGasLimit)
-          },
-          caller
+          }
         });
         build.value = build.value.toString();
         const query = {

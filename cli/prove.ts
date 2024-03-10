@@ -69,12 +69,13 @@ export const prove = async (
                 target: callbackTarget,
                 extraData: callbackExtraData,
             },
+            caller: caller,
+            provider,
             options: {
                 refundee: refundAddress,
                 maxFeePerGas: maxFeePerGas,
                 callbackGasLimit: Number(callbackGasLimit),
             },
-            caller: caller,
         });
         build.value = build.value.toString() as any;
         const query = {
