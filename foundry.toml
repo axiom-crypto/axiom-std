@@ -4,6 +4,7 @@ out = "out"
 solc = "0.8.19"
 libs = ["node_modules", "lib"]
 ffi = true
+ast = true
 
 [rpc_endpoints]
 sepolia = "${PROVIDER_URI_SEPOLIA}"
