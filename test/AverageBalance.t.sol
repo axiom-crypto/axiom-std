@@ -65,7 +65,8 @@ contract AverageBalanceTest is AxiomTest {
         // create a query into Axiom with custom `callbackExtraData`, `feeData`, and `caller`
         address caller = address(123);
         vm.deal(caller, 1 ether);
-        Query memory q = query(querySchema, abi.encode(input), address(averageBalance), callbackExtraData, feeData, caller);
+        Query memory q =
+            query(querySchema, abi.encode(input), address(averageBalance), callbackExtraData, feeData, caller);
 
         // send the query to Axiom
         vm.expectEmit(false, false, false, false);
@@ -74,10 +75,19 @@ contract AverageBalanceTest is AxiomTest {
         emit QueryInitiatedOnchain(caller, bytes32(0), 0, bytes32(0), caller, address(averageBalance), hex"");
         q.send();
 
+        // peek at the callback results without pranking fulfillment
+        bytes32[] memory peekedResults = q.peekResults();
+
         // prank fulfillment of the query, returning the Axiom results
         vm.expectEmit();
         emit AverageBalanceStored(input.blockNumber, input._address, 0);
         bytes32[] memory results = q.prankFulfill();
+
+        // check that peekedResults and results are the same
+        assertEq(peekedResults.length, results.length);
+        for (uint256 i = 0; i < results.length; i++) {
+            assertEq(peekedResults[i], results[i]);
+        }
 
         // parse Axiom results and verify length is as expected
         assertEq(results.length, 3);
