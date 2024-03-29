@@ -93,6 +93,16 @@ library Axiom {
         self.axiomVm.prankCallback(args);
         results = args.axiomResults;
     }
+
+    /// @dev Returns results from a callback to Axiom, without pranking the fulfillment
+    /// @param self The query to peek results for
+    /// @return results The results of the query
+    function peekResults(Query memory self) public returns (bytes32[] memory results) {
+        FulfillCallbackArgs memory args = self.axiomVm.fulfillCallbackArgs(
+            self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData, self.caller
+        );
+        results = args.axiomResults;
+    }
 }
 
 /// @title AxiomVm
