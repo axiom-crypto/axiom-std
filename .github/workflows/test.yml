@@ -45,6 +45,7 @@ jobs:
       - name: Run Foundry tests
         run: |
           export PROVIDER_URI_SEPOLIA=${{ secrets.PROVIDER_URI_SEPOLIA }}
+          export PROVIDER_URI_BASE=${{ secrets.PROVIDER_URI_BASE }}
           RUST_BACKTRACE=1 forge test -vvv
 
   test-mac:
@@ -84,4 +85,5 @@ jobs:
       - name: Run Foundry tests
         run: |
           export PROVIDER_URI_SEPOLIA=${{ secrets.PROVIDER_URI_SEPOLIA }}
+          export PROVIDER_URI_BASE=${{ secrets.PROVIDER_URI_BASE }}
           RUST_BACKTRACE=1 forge test -vvv
