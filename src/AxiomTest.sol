@@ -5,11 +5,11 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
 // 🧩 MODULES
-import {AxiomVm, Query, Axiom, QueryArgs, FulfillCallbackArgs} from "./AxiomVm.sol";
+import { AxiomVm, Query, Axiom, QueryArgs, FulfillCallbackArgs } from "./AxiomVm.sol";
 import { IAxiomV2Core } from "@axiom-crypto/v2-periphery/interfaces/core/IAxiomV2Core.sol";
 import { IAxiomV2Query } from "@axiom-crypto/v2-periphery/interfaces/query/IAxiomV2Query.sol";
 import { IAxiomV2Client } from "@axiom-crypto/v2-periphery/interfaces/client/IAxiomV2Client.sol";
-import { AxiomV2Addresses } from "./AxiomV2Addresses.sol";
+import { AxiomV2Addresses, MAINNET_CHAIN_ID, SEPOLIA_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID } from "./AxiomV2Addresses.sol";
 
 // ⭐️ TEST
 /// @title AxiomTest
@@ -30,6 +30,12 @@ abstract contract AxiomTest is Test {
 
     /// @dev The AxiomVm contract
     AxiomVm axiomVm;
+
+    /// @dev Dummy address for AxiomV2Core used when Axiom is not yet deployed on a chain
+    address public constant DUMMY_AXIOM_V2_CORE_ADDRESS = 0xDeaDBEefDeaDBEEfdEadBEEFdEaDbEefCCcccccc;
+
+    /// @dev Dummy address for AxiomV2Query used when Axiom is not yet deployed on a chain
+    address public constant DUMMY_AXIOM_V2_QUERY_ADDRESS = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
 
     /// @dev Event emitted when a query is initiated on-chain
     event QueryInitiatedOnchain(
@@ -59,7 +65,7 @@ abstract contract AxiomTest is Test {
         vm.createSelectFork(urlOrAlias, forkBlock);
         uint64 chainId = uint64(block.chainid);
 
-        if (chainId == 1) {
+        if (chainId == MAINNET_CHAIN_ID) {
             axiomV2CoreAddress = AxiomV2Addresses.axiomV2CoreAddress(chainId);
             axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryAddress(chainId);
 
@@ -71,7 +77,9 @@ abstract contract AxiomTest is Test {
                 forkBlock >= AxiomV2Addresses.axiomV2QueryDeployBlock(chainId),
                 "AxiomV2Query not yet deployed at forkBlock"
             );
-        } else {
+            axiomV2Core = IAxiomV2Core(axiomV2CoreAddress);
+            axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
+        } else if (chainId == SEPOLIA_CHAIN_ID || chainId == BASE_SEPOLIA_CHAIN_ID) {
             axiomV2CoreAddress = AxiomV2Addresses.axiomV2CoreMockAddress(chainId);
             axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryMockAddress(chainId);
 
@@ -83,9 +91,12 @@ abstract contract AxiomTest is Test {
                 forkBlock >= AxiomV2Addresses.axiomV2QueryMockDeployBlock(chainId),
                 "AxiomV2QueryMock not yet deployed at forkBlock"
             );
+            axiomV2Core = IAxiomV2Core(axiomV2CoreAddress);
+            axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
+        } else {
+            axiomV2CoreAddress = DUMMY_AXIOM_V2_CORE_ADDRESS;
+            axiomV2QueryAddress = DUMMY_AXIOM_V2_QUERY_ADDRESS;
         }
-        axiomV2Core = IAxiomV2Core(axiomV2CoreAddress);
-        axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
 
         vm.makePersistent(axiomV2CoreAddress);
         vm.makePersistent(axiomV2QueryAddress);
