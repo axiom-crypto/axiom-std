@@ -5,11 +5,11 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
 // 🧩 MODULES
-import { AxiomVm, Query, Axiom, QueryArgs, FulfillCallbackArgs } from "./AxiomVm.sol";
-import { IAxiomV2Core } from "@axiom-crypto/v2-periphery/interfaces/core/IAxiomV2Core.sol";
-import { IAxiomV2Query } from "@axiom-crypto/v2-periphery/interfaces/query/IAxiomV2Query.sol";
-import { IAxiomV2Client } from "@axiom-crypto/v2-periphery/interfaces/client/IAxiomV2Client.sol";
-import { AxiomV2Addresses, MAINNET_CHAIN_ID, SEPOLIA_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID } from "./AxiomV2Addresses.sol";
+import {AxiomVm, Query, Axiom, QueryArgs, FulfillCallbackArgs} from "./AxiomVm.sol";
+import {IAxiomV2Core} from "@axiom-crypto/v2-periphery/interfaces/core/IAxiomV2Core.sol";
+import {IAxiomV2Query} from "@axiom-crypto/v2-periphery/interfaces/query/IAxiomV2Query.sol";
+import {IAxiomV2Client} from "@axiom-crypto/v2-periphery/interfaces/client/IAxiomV2Client.sol";
+import {AxiomV2Addresses, MAINNET_CHAIN_ID, SEPOLIA_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID, BASE_CHAIN_ID} from "./AxiomV2Addresses.sol";
 
 // ⭐️ TEST
 /// @title AxiomTest
@@ -32,10 +32,12 @@ abstract contract AxiomTest is Test {
     AxiomVm axiomVm;
 
     /// @dev Dummy address for AxiomV2Core used when Axiom is not yet deployed on a chain
-    address public constant DUMMY_AXIOM_V2_CORE_ADDRESS = 0xDeaDBEefDeaDBEEfdEadBEEFdEaDbEefCCcccccc;
+    address public constant DUMMY_AXIOM_V2_CORE_ADDRESS =
+        0xDeaDBEefDeaDBEEfdEadBEEFdEaDbEefCCcccccc;
 
     /// @dev Dummy address for AxiomV2Query used when Axiom is not yet deployed on a chain
-    address public constant DUMMY_AXIOM_V2_QUERY_ADDRESS = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
+    address public constant DUMMY_AXIOM_V2_QUERY_ADDRESS =
+        0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
 
     /// @dev Event emitted when a query is initiated on-chain
     event QueryInitiatedOnchain(
@@ -61,7 +63,10 @@ abstract contract AxiomTest is Test {
     /// @dev Create a forked test environment and set up Axiom contracts
     /// @param urlOrAlias The URL or alias of the fork to create
     /// @param forkBlock The block number to fork from
-    function _createSelectForkAndSetupAxiom(string memory urlOrAlias, uint256 forkBlock) internal {
+    function _createSelectForkAndSetupAxiom(
+        string memory urlOrAlias,
+        uint256 forkBlock
+    ) internal {
         vm.createSelectFork(urlOrAlias, forkBlock);
         uint64 chainId = uint64(block.chainid);
 
@@ -79,16 +84,24 @@ abstract contract AxiomTest is Test {
             );
             axiomV2Core = IAxiomV2Core(axiomV2CoreAddress);
             axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
-        } else if (chainId == SEPOLIA_CHAIN_ID || chainId == BASE_SEPOLIA_CHAIN_ID) {
-            axiomV2CoreAddress = AxiomV2Addresses.axiomV2CoreMockAddress(chainId);
-            axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryMockAddress(chainId);
+        } else if (
+            chainId == SEPOLIA_CHAIN_ID || chainId == BASE_SEPOLIA_CHAIN_ID
+        ) {
+            axiomV2CoreAddress = AxiomV2Addresses.axiomV2CoreMockAddress(
+                chainId
+            );
+            axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryMockAddress(
+                chainId
+            );
 
             require(
-                forkBlock >= AxiomV2Addresses.axiomV2CoreMockDeployBlock(chainId),
+                forkBlock >=
+                    AxiomV2Addresses.axiomV2CoreMockDeployBlock(chainId),
                 "AxiomV2CoreMock not yet deployed at forkBlock"
             );
             require(
-                forkBlock >= AxiomV2Addresses.axiomV2QueryMockDeployBlock(chainId),
+                forkBlock >=
+                    AxiomV2Addresses.axiomV2QueryMockDeployBlock(chainId),
                 "AxiomV2QueryMock not yet deployed at forkBlock"
             );
             axiomV2Core = IAxiomV2Core(axiomV2CoreAddress);
@@ -108,19 +121,31 @@ abstract contract AxiomTest is Test {
     /// @param _querySchema The query schema to use
     /// @param input The input data for the query
     /// @param callbackTarget The address of the contract to send a callback to
-    function query(bytes32 _querySchema, bytes memory input, address callbackTarget)
-        internal
-        view
-        returns (Query memory)
-    {
-        return query(
-            _querySchema,
-            input,
-            callbackTarget,
-            bytes(""),
-            IAxiomV2Query.AxiomV2FeeData({ maxFeePerGas: 25 gwei, callbackGasLimit: 1_000_000, overrideAxiomQueryFee: 0 }),
-            msg.sender
-        );
+    function query(
+        bytes32 _querySchema,
+        bytes memory input,
+        address callbackTarget
+    ) internal view returns (Query memory) {
+        uint64 maxFeePerGas = 25 gwei;
+        if (
+            block.chainid == BASE_CHAIN_ID ||
+            block.chainid == BASE_SEPOLIA_CHAIN_ID
+        ) {
+            maxFeePerGas = 0.75 gwei;
+        }
+        return
+            query(
+                _querySchema,
+                input,
+                callbackTarget,
+                bytes(""),
+                IAxiomV2Query.AxiomV2FeeData({
+                    maxFeePerGas: maxFeePerGas,
+                    callbackGasLimit: 1_000_000,
+                    overrideAxiomQueryFee: 0
+                }),
+                msg.sender
+            );
     }
 
     /// @dev Create a query into Axiom with advanced parameters
@@ -138,15 +163,16 @@ abstract contract AxiomTest is Test {
         IAxiomV2Query.AxiomV2FeeData memory feeData,
         address caller
     ) internal view returns (Query memory) {
-        return Query({
-            querySchema: _querySchema,
-            input: input,
-            callbackTarget: callbackTarget,
-            callbackExtraData: callbackExtraData,
-            feeData: feeData,
-            axiomVm: axiomVm,
-            outputString: "",
-            caller: caller
-        });
+        return
+            Query({
+                querySchema: _querySchema,
+                input: input,
+                callbackTarget: callbackTarget,
+                callbackExtraData: callbackExtraData,
+                feeData: feeData,
+                axiomVm: axiomVm,
+                outputString: "",
+                caller: caller
+            });
     }
 }

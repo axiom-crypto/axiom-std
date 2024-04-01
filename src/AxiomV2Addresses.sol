@@ -7,6 +7,7 @@ import {
 } from "@axiom-crypto/v2-periphery/libraries/configuration/AxiomV2Configuration.sol";
 
 uint64 constant BASE_SEPOLIA_CHAIN_ID = 84_532;
+uint64 constant BASE_CHAIN_ID = 8453;
 
 /// @title AxiomV2Addresses
 /// @notice AxiomV2Addresses is a library that contains the addresses of deployed Axiom V2 contracts

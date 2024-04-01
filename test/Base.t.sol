@@ -16,7 +16,7 @@ contract ArrayTest is AxiomTest {
     bytes32 public querySchema;
 
     function setUp() public {
-        _createSelectForkAndSetupAxiom("sepolia", 5_103_100);
+        _createSelectForkAndSetupAxiom("base", BASE_CHAIN_ID);
 
         uint64[] memory blockNumbers = new uint64[](3);
         uint256[] memory slots = new uint256[](3);
@@ -36,7 +36,11 @@ contract ArrayTest is AxiomTest {
     /// @dev Simple demonstration of testing an Axiom client contract using Axiom cheatcodes
     function test_simple_example() public {
         // create a query into Axiom with default parameters
-        Query memory q = query(querySchema, abi.encode(input), address(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b));
+        Query memory q = query(
+            querySchema,
+            abi.encode(input),
+            address(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b)
+        );
 
         // send the query to Axiom
         q.send();
