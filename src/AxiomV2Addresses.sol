@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { MAINNET_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@axiom-crypto/v2-periphery/libraries/configuration/AxiomV2Configuration.sol";
+import {
+    MAINNET_CHAIN_ID,
+    SEPOLIA_CHAIN_ID
+} from "@axiom-crypto/v2-periphery/libraries/configuration/AxiomV2Configuration.sol";
+
+uint64 constant BASE_SEPOLIA_CHAIN_ID = 84_532;
 
 /// @title AxiomV2Addresses
 /// @notice AxiomV2Addresses is a library that contains the addresses of deployed Axiom V2 contracts
@@ -12,11 +17,17 @@ library AxiomV2Addresses {
     address public constant SEPOLIA_AXIOM_V2_CORE_MOCK_ADDRESS = 0x69963768F8407dE501029680dE46945F838Fc98B;
     address public constant SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS = 0x83c8c0B395850bA55c830451Cfaca4F2A667a983;
 
+    address public constant BASE_SEPOLIA_AXIOM_V2_CORE_MOCK_ADDRESS = 0xB93087Acb2b4dfF8854C01DC661710D6f5FB7a94;
+    address public constant BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS = 0xfe059442B0379D5f22Bec384A588766f98A36812;
+
     uint256 public constant AXIOM_V2_CORE_DEPLOY_BLOCK = 18_993_287;
     uint256 public constant AXIOM_V2_QUERY_DEPLOY_BLOCK = 19_027_522;
 
     uint256 public constant SEPOLIA_AXIOM_V2_CORE_MOCK_DEPLOY_BLOCK = 5_095_060;
     uint256 public constant SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK = 5_103_063;
+
+    uint256 public constant BASE_SEPOLIA_AXIOM_V2_CORE_MOCK_DEPLOY_BLOCK = 7_993_784;
+    uint256 public constant BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK = 7_994_008;
 
     /// @dev Error returned if the corresponding Axiom V2 contract does not exist for the requested chainId
     error ContractDoesNotExistForChainId();
@@ -46,6 +57,8 @@ library AxiomV2Addresses {
             revert ContractDoesNotExistForChainId();
         } else if (chainId == SEPOLIA_CHAIN_ID) {
             addr = SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS;
+        } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
+            addr = BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS;
         } else {
             revert ContractDoesNotExistForChainId();
         }
@@ -76,6 +89,8 @@ library AxiomV2Addresses {
             revert ContractDoesNotExistForChainId();
         } else if (chainId == SEPOLIA_CHAIN_ID) {
             addr = SEPOLIA_AXIOM_V2_CORE_MOCK_ADDRESS;
+        } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
+            addr = BASE_SEPOLIA_AXIOM_V2_CORE_MOCK_ADDRESS;
         } else {
             revert ContractDoesNotExistForChainId();
         }
@@ -103,6 +118,8 @@ library AxiomV2Addresses {
             revert ContractDoesNotExistForChainId();
         } else if (chainId == SEPOLIA_CHAIN_ID) {
             blockNumber = SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK;
+        } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
+            blockNumber = BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK;
         } else {
             revert ContractDoesNotExistForChainId();
         }
@@ -127,6 +144,8 @@ library AxiomV2Addresses {
             revert ContractDoesNotExistForChainId();
         } else if (chainId == SEPOLIA_CHAIN_ID) {
             blockNumber = SEPOLIA_AXIOM_V2_CORE_MOCK_DEPLOY_BLOCK;
+        } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
+            blockNumber = BASE_SEPOLIA_AXIOM_V2_CORE_MOCK_DEPLOY_BLOCK;
         } else {
             revert ContractDoesNotExistForChainId();
         }
