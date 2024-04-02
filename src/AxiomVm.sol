@@ -6,7 +6,13 @@ import "forge-std/console.sol";
 
 import { IAxiomV2Query } from "@axiom-crypto/v2-periphery/interfaces/query/IAxiomV2Query.sol";
 import { IAxiomV2Client } from "@axiom-crypto/v2-periphery/interfaces/client/IAxiomV2Client.sol";
-import { AxiomV2Addresses, MAINNET_CHAIN_ID, SEPOLIA_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID } from "./AxiomV2Addresses.sol";
+import {
+    AxiomV2Addresses,
+    MAINNET_CHAIN_ID,
+    SEPOLIA_CHAIN_ID,
+    BASE_CHAIN_ID,
+    BASE_SEPOLIA_CHAIN_ID
+} from "./AxiomV2Addresses.sol";
 
 import { AxiomCli } from "./AxiomCli.sol";
 
@@ -280,8 +286,12 @@ contract AxiomVm is Test {
         public
         returns (QueryArgs memory args, string memory queryString)
     {
+        uint64 maxFeePerGas = 25 gwei;
+        if (block.chainid == BASE_CHAIN_ID || block.chainid == BASE_SEPOLIA_CHAIN_ID) {
+            maxFeePerGas = 0.75 gwei;
+        }
         IAxiomV2Query.AxiomV2FeeData memory feeData = IAxiomV2Query.AxiomV2FeeData({
-            maxFeePerGas: 25 gwei,
+            maxFeePerGas: maxFeePerGas,
             callbackGasLimit: 1_000_000,
             overrideAxiomQueryFee: 0
         });
