@@ -24,7 +24,11 @@ contract ArrayTest is AxiomTest {
             blockNumbers[i] = 4_205_938;
             slots[i] = i;
         }
-        input = AxiomInput({ blockNumbers: blockNumbers, slots: slots, _address: address(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b)});
+        input = AxiomInput({
+            blockNumbers: blockNumbers,
+            slots: slots,
+            _address: address(0x8018fe32fCFd3d166E8b4c4E37105318A84BA11b)
+        });
 
         querySchema = axiomVm.readCircuit("test/circuit/array.circuit.ts");
     }

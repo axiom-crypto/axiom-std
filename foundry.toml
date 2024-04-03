@@ -9,6 +9,8 @@ ast = true
 [rpc_endpoints]
 sepolia = "${PROVIDER_URI_SEPOLIA}"
 mainnet = "${PROVIDER_URI_MAINNET}"
+base-sepolia = "${PROVIDER_URI_BASE_SEPOLIA}"
+base = "${PROVIDER_URI_BASE}"
 
 [fmt]
   bracket_spacing = true
