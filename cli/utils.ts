@@ -115,7 +115,7 @@ export const getInputs = (inputs: string, inputSchema: string): any => {
     const abis = getAbis().filter((x: any) => validateAbi(x, inputSchema));
 
     if (abis.length === 0) {
-        throw new Error("Could not find valid ABI");
+        throw new Error("Could not find valid ABI: AxiomInput definitions in circuit and Foundry test do not match");
     }
 
     const abi = abis[0];
