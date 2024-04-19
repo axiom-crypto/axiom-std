@@ -110,7 +110,7 @@ var require_utils = __commonJS({
       const keys = Object.keys(inputSchemaJson);
       const abis = (0, exports2.getAbis)().filter((x) => validateAbi(x, inputSchema));
       if (abis.length === 0) {
-        throw new Error("Could not find valid ABI");
+        throw new Error("Could not find valid ABI: AxiomInput definitions in circuit and Foundry test do not match");
       }
       const abi = abis[0];
       const rawInputs = (0, viem_12.decodeAbiParameters)(abi, inputs2)[0];
