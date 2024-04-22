@@ -18,6 +18,9 @@ library AxiomV2Addresses {
     address public constant SEPOLIA_AXIOM_V2_CORE_MOCK_ADDRESS = 0x69963768F8407dE501029680dE46945F838Fc98B;
     address public constant SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS = 0x83c8c0B395850bA55c830451Cfaca4F2A667a983;
 
+    address public constant BASE_AXIOM_V2_CORE_ADDRESS = 0xB93087Acb2b4dfF8854C01DC661710D6f5FB7a94;
+    address public constant BASE_AXIOM_V2_QUERY_ADDRESS = 0xfe059442B0379D5f22Bec384A588766f98A36812;
+
     address public constant BASE_SEPOLIA_AXIOM_V2_CORE_MOCK_ADDRESS = 0xB93087Acb2b4dfF8854C01DC661710D6f5FB7a94;
     address public constant BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS = 0xfe059442B0379D5f22Bec384A588766f98A36812;
 
@@ -26,6 +29,9 @@ library AxiomV2Addresses {
 
     uint256 public constant SEPOLIA_AXIOM_V2_CORE_MOCK_DEPLOY_BLOCK = 5_095_060;
     uint256 public constant SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK = 5_103_063;
+
+    uint256 public constant BASE_AXIOM_V2_CORE_DEPLOY_BLOCK = 13_033_471;
+    uint256 public constant BASE_AXIOM_V2_QUERY_DEPLOY_BLOCK = 13_465_169;
 
     uint256 public constant BASE_SEPOLIA_AXIOM_V2_CORE_MOCK_DEPLOY_BLOCK = 7_993_784;
     uint256 public constant BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK = 7_994_008;
@@ -42,6 +48,8 @@ library AxiomV2Addresses {
     function axiomV2QueryAddress(uint64 chainId) public pure returns (address addr) {
         if (chainId == MAINNET_CHAIN_ID) {
             addr = AXIOM_V2_QUERY_ADDRESS;
+        } else if (chainId == BASE_CHAIN_ID) {
+            addr = BASE_AXIOM_V2_QUERY_ADDRESS;
         } else {
             revert ContractDoesNotExistForChainId();
         }
@@ -74,6 +82,8 @@ library AxiomV2Addresses {
     function axiomV2CoreAddress(uint64 chainId) public pure returns (address addr) {
         if (chainId == MAINNET_CHAIN_ID) {
             addr = AXIOM_V2_CORE_ADDRESS;
+        } else if (chainId == BASE_CHAIN_ID) {
+            addr = BASE_AXIOM_V2_CORE_ADDRESS;
         } else {
             revert ContractDoesNotExistForChainId();
         }
@@ -106,6 +116,8 @@ library AxiomV2Addresses {
     function axiomV2QueryDeployBlock(uint64 chainId) public pure returns (uint256 blockNumber) {
         if (chainId == MAINNET_CHAIN_ID) {
             blockNumber = AXIOM_V2_QUERY_DEPLOY_BLOCK;
+        } else if (chainId == BASE_CHAIN_ID) {
+            blockNumber = BASE_AXIOM_V2_QUERY_DEPLOY_BLOCK;
         } else {
             revert ContractDoesNotExistForChainId();
         }
@@ -132,6 +144,9 @@ library AxiomV2Addresses {
     function axiomV2CoreDeployBlock(uint64 chainId) public pure returns (uint256 blockNumber) {
         if (chainId == MAINNET_CHAIN_ID) {
             blockNumber = AXIOM_V2_CORE_DEPLOY_BLOCK;
+        }
+        if (chainId == BASE_CHAIN_ID) {
+            blockNumber = BASE_AXIOM_V2_CORE_DEPLOY_BLOCK;
         } else {
             revert ContractDoesNotExistForChainId();
         }
