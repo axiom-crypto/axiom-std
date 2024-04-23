@@ -60,7 +60,18 @@ abstract contract AxiomTest is Test {
         uint256 amount
     );
 
-    /// @dev Create a forked test environment and set up Axiom contracts
+    /// @dev Create a forked test environment from the latest block and set up Axiom contracts
+    /// @param urlOrAlias The URL or alias of the fork to create
+    function _createSelectForkAndSetupAxiom(
+        string memory urlOrAlias
+    ) internal {
+        vm.createSelectFork(urlOrAlias);
+        _setupAxiomFromFork(block.number);
+
+        axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
+    }
+
+    /// @dev Create a forked test environment from a specified block and set up Axiom contracts
     /// @param urlOrAlias The URL or alias of the fork to create
     /// @param forkBlock The block number to fork from
     function _createSelectForkAndSetupAxiom(
@@ -68,6 +79,16 @@ abstract contract AxiomTest is Test {
         uint256 forkBlock
     ) internal {
         vm.createSelectFork(urlOrAlias, forkBlock);
+        _setupAxiomFromFork(forkBlock);
+
+        axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
+    }
+
+    /// @dev Set up Axiom contracts
+    /// @param forkBlock The block number that the fork was created from
+    function _setupAxiomFromFork(
+        uint256 forkBlock
+    ) private {
         uint64 chainId = uint64(block.chainid);
 
         if (chainId == MAINNET_CHAIN_ID) {
@@ -113,8 +134,6 @@ abstract contract AxiomTest is Test {
 
         vm.makePersistent(axiomV2CoreAddress);
         vm.makePersistent(axiomV2QueryAddress);
-
-        axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
     }
 
     /// @dev Create a query into Axiom with default parameters
