@@ -215,7 +215,6 @@ var require_prove = __commonJS({
     var utils_1 = require("@axiom-crypto/circuit/cliHandler/utils");
     var utils_2 = require_utils();
     var viem_1 = require("viem");
-    var core_1 = require("@axiom-crypto/core");
     var client_1 = require("@axiom-crypto/client");
     var utils_3 = require("@axiom-crypto/client/axiom/utils");
     var prove = async (compiledJson, inputs, providerUri, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
@@ -235,11 +234,6 @@ var require_prove = __commonJS({
       });
       let decodedInputSchema = Buffer.from(compiled.inputSchema, "base64");
       const circuitInputs = (0, utils_2.getInputs)(inputs, decoder.decode(decodedInputSchema));
-      const axiom = new core_1.AxiomSdkCore({
-        providerUri: provider,
-        chainId: sourceChainId,
-        version: "v2"
-      });
       try {
         let computeQuery;
         circuit.loadSavedMock(compiled);
@@ -253,19 +247,21 @@ var require_prove = __commonJS({
           dataQuery
         };
         let build = await (0, client_1.buildSendQuery)({
-          axiom,
+          chainId: sourceChainId,
+          providerUri: provider,
           dataQuery: res.dataQuery,
           computeQuery: res.computeQuery,
           callback: {
             target: callbackTarget,
             extraData: callbackExtraData
           },
+          caller,
+          mock: false,
           options: {
             refundee: refundAddress,
             maxFeePerGas,
             callbackGasLimit: Number(callbackGasLimit)
-          },
-          caller
+          }
         });
         build.value = build.value.toString();
         const query = {
