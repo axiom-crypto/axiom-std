@@ -85,7 +85,7 @@ library Axiom {
     /// @param self The query to send
     function send(Query memory self) public {
         if (
-            block.chainid == MAINNET_CHAIN_ID || block.chainid == SEPOLIA_CHAIN_ID
+            block.chainid == MAINNET_CHAIN_ID || block.chainid == SEPOLIA_CHAIN_ID || block.chainid == BASE_CHAIN_ID
                 || block.chainid == BASE_SEPOLIA_CHAIN_ID
         ) {
             self.outputString = self.axiomVm.getArgsAndSendQuery(

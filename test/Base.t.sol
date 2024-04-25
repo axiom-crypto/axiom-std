@@ -80,7 +80,7 @@ contract BaseArrayTest is AxiomTest {
     MockClient public client;
 
     function setUp() public {
-        _createSelectForkAndSetupAxiom("base", BASE_CHAIN_ID);
+        _createSelectForkAndSetupAxiom("base", 13_500_000);
 
         uint64[] memory blockNumbers = new uint64[](3);
         uint256[] memory slots = new uint256[](3);
