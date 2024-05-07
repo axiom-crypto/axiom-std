@@ -144,8 +144,7 @@ library AxiomV2Addresses {
     function axiomV2CoreDeployBlock(uint64 chainId) public pure returns (uint256 blockNumber) {
         if (chainId == MAINNET_CHAIN_ID) {
             blockNumber = AXIOM_V2_CORE_DEPLOY_BLOCK;
-        }
-        if (chainId == BASE_CHAIN_ID) {
+        } else if (chainId == BASE_CHAIN_ID) {
             blockNumber = BASE_AXIOM_V2_CORE_DEPLOY_BLOCK;
         } else {
             revert ContractDoesNotExistForChainId();
