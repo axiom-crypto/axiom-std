@@ -105,7 +105,7 @@ contract AverageBalanceTest is AxiomTest {
         // send the query to Axiom
         q.send();
 
-        // prank fulfillment of the query, returning the Axiom results 
+        // prank fulfillment of the query, returning the Axiom results
         bytes32[] memory results = q.prankFulfill();
 
         // parse Axiom results and verify length is as expected
@@ -129,3 +129,11 @@ This repo contains both Foundry and Javascript packages. To install, run:
 forge install
 npm install     # or `pnpm install` or `yarn install`
 ```
+
+The `build` folder contains a bundled version of the Typescript portions of axiom-std for convenience. During development, if the Typescript files in `cli` are changed, run
+
+```bash
+npm build      # or `pnpm build` or `yarn build`
+```
+
+prior to committing to update the file `build/axiom-std-cli-build.js`.
