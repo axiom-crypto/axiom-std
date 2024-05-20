@@ -1,6 +1,6 @@
 {
   "name": "axiom-std",
-  "version": "0.1.7",
+  "version": "0.1.10",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,7 @@
   "author": "Intrinsic Technologies",
   "license": "MIT",
   "dependencies": {
-    "@axiom-crypto/circuit": "2.0.9",
+    "@axiom-crypto/circuit": "2.1.0-alpha.1",
     "@axiom-crypto/client": "2.1.0-alpha.1",
     "commander": "^11.1.0",
     "dotenv": "^16.4.5",

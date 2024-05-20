@@ -1,5 +1,5 @@
 import { AxiomBaseCircuit } from "@axiom-crypto/circuit/js";
-import { getFunctionFromTs, getProvider } from "@axiom-crypto/circuit/cliHandler/utils";
+import { getFunctionFromTs, getRpcUrl } from "@axiom-crypto/circuit/cliHandler/utils";
 import { redirectConsole } from "./utils";
 import { encodeAbiParameters, parseAbiParameters } from "viem";
 
@@ -11,11 +11,11 @@ export const compile = async (
     const { restoreConsole, getCaptures } = redirectConsole();
     let circuitFunction = "circuit";
     const f = await getFunctionFromTs(circuitPath, circuitFunction);
-    const provider = getProvider(rpcUrl);
+    const rpcUrlOrCache = getRpcUrl(rpcUrl);
     const circuit = new AxiomBaseCircuit({
         f: f.circuit,
         mock: true,
-        provider,
+        rpcUrl: rpcUrlOrCache,
         shouldTime: false,
         inputSchema: f.inputSchema,
     })

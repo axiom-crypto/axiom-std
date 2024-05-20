@@ -165,11 +165,11 @@ var require_compile = __commonJS({
       const { restoreConsole: restoreConsole2, getCaptures: getCaptures2 } = (0, utils_22.redirectConsole)();
       let circuitFunction = "circuit";
       const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
-      const provider2 = (0, utils_12.getProvider)(rpcUrl2);
+      const rpcUrlOrCache2 = (0, utils_12.getRpcUrl)(rpcUrl2);
       const circuit2 = new js_12.AxiomBaseCircuit({
         f: f.circuit,
         mock: true,
-        provider: provider2,
+        rpcUrl: rpcUrlOrCache2,
         shouldTime: false,
         inputSchema: f.inputSchema
       });
@@ -221,7 +221,7 @@ var require_prove = __commonJS({
     var prove = async (compiledJson, inputs, rpcUrl, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
       const { restoreConsole, getCaptures } = (0, utils_2.redirectConsole)();
       const decoder = new TextDecoder();
-      const provider = (0, utils_1.getProvider)(rpcUrl);
+      const rpcUrlOrCache = (0, utils_1.getRpcUrl)(rpcUrl);
       let compiled = JSON.parse(compiledJson);
       const decodedArray = Buffer.from(compiled.circuit, "base64");
       const raw = decoder.decode(decodedArray);
@@ -229,7 +229,7 @@ var require_prove = __commonJS({
       const circuit = new js_1.AxiomBaseCircuit({
         f: eval(raw),
         mock: true,
-        provider,
+        rpcUrl: rpcUrlOrCache,
         shouldTime: false,
         inputSchema: compiled.inputSchema
       });
@@ -249,7 +249,7 @@ var require_prove = __commonJS({
         };
         let build = await (0, client_1.buildSendQuery)({
           chainId: sourceChainId,
-          rpcUrl: provider,
+          rpcUrl: rpcUrlOrCache,
           axiomV2QueryAddress: (0, address_1.getAxiomV2QueryAddress)(sourceChainId),
           dataQuery: res.dataQuery,
           computeQuery: res.computeQuery,

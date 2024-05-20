@@ -1,5 +1,5 @@
 import { AxiomBaseCircuit } from "@axiom-crypto/circuit/js";
-import { getProvider } from "@axiom-crypto/circuit/cliHandler/utils";
+import { getRpcUrl } from "@axiom-crypto/circuit/cliHandler/utils";
 import { getInputs, redirectConsole } from './utils';
 import { encodeAbiParameters, parseAbiParameters } from 'viem';
 import { buildSendQuery } from "@axiom-crypto/client";
@@ -21,7 +21,7 @@ export const prove = async (
     const { restoreConsole, getCaptures } = redirectConsole();
     const decoder = new TextDecoder();
 
-    const provider = getProvider(rpcUrl);
+    const rpcUrlOrCache = getRpcUrl(rpcUrl);
     let compiled = JSON.parse(compiledJson);
 
     const decodedArray = Buffer.from(compiled.circuit, 'base64');
@@ -31,7 +31,7 @@ export const prove = async (
     const circuit = new AxiomBaseCircuit({
         f: eval(raw),
         mock: true,
-        provider,
+        rpcUrl: rpcUrlOrCache,
         shouldTime: false,
         inputSchema: compiled.inputSchema,
     })
@@ -56,7 +56,7 @@ export const prove = async (
 
         let build = await buildSendQuery({
             chainId: sourceChainId,
-            rpcUrl: provider,
+            rpcUrl: rpcUrlOrCache,
             axiomV2QueryAddress: getAxiomV2QueryAddress(sourceChainId),   
             dataQuery: res.dataQuery,
             computeQuery: res.computeQuery,

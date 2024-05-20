@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@axiom-crypto/circuit':
-    specifier: 2.0.9
-    version: 2.0.9(typescript@5.4.5)
+    specifier: 2.1.0-alpha.1
+    version: 2.1.0-alpha.1(typescript@5.4.5)
   '@axiom-crypto/client':
     specifier: 2.1.0-alpha.1
     version: 2.1.0-alpha.1(typescript@5.4.5)
@@ -40,23 +40,6 @@ packages:
 
   /@adraffy/ens-normalize@1.10.1:
     resolution: {integrity: sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw==}
-    dev: false
-
-  /@axiom-crypto/circuit@2.0.9(typescript@5.4.5):
-    resolution: {integrity: sha512-wqLSOZUxoi3GAinYiZh6CkbjXwvuJt5Eam1fGjtgi2zhbTDuPDOLn7K/jgy4r1H7pKkC/oXjH0B5nw9jaooN8g==}
-    dependencies:
-      '@axiom-crypto/halo2-lib-js': 0.3.4
-      '@axiom-crypto/halo2-wasm': 0.3.4
-      '@axiom-crypto/tools': 2.1.1
-      commander: 11.1.0
-      ethers: 6.12.1
-      viem: 2.11.1(typescript@5.4.5)
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - typescript
-      - utf-8-validate
-      - zod
     dev: false
 
   /@axiom-crypto/circuit@2.1.0-alpha.1(typescript@5.4.5):
