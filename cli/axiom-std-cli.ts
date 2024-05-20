@@ -14,7 +14,7 @@ program.command("readCircuit")
     .action(compile);
 
 program.command("prove")
-    .description("Prove a circuit")
+    .description("Prove a circuit and generate query results")
     .argument("<compiledJson>", "compiled json string")
     .argument("<inputs>", "inputs to the circuit")
     .argument("<rpcUrl>", "JSON-RPC provider to use")
@@ -25,6 +25,10 @@ program.command("prove")
     .argument("<maxFeePerGas>", "max fee per gas")
     .argument("<callbackGasLimit>", "callback gas limit")
     .argument("<caller>", "caller")
+    .option("-t, --targetChainId [targetChainId]", "target chain id")
+    .option("-b, --bridgeId [bridgeId]", "bridge id", parseInt)
+    .option("-br, --broadcaster", "Use crosschain broadcaster")
+    .option("-bo, --blockhashOracle", "Use crosschain blockhash oracle")    
     .action(prove);
 
 program.parseAsync(process.argv);

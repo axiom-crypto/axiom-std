@@ -218,7 +218,7 @@ var require_prove = __commonJS({
     var client_1 = require("@axiom-crypto/client");
     var utils_3 = require("@axiom-crypto/client/axiom/utils");
     var address_1 = require("@axiom-crypto/client/lib/address");
-    var prove = async (compiledJson, inputs, rpcUrl, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
+    var prove = async (compiledJson, inputs, rpcUrl, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller, targetChainId, bridgeId, broadcaster, blockhashOracle) => {
       const { restoreConsole, getCaptures } = (0, utils_2.redirectConsole)();
       const decoder = new TextDecoder();
       const rpcUrlOrCache = (0, utils_1.getRpcUrl)(rpcUrl);
@@ -247,10 +247,30 @@ var require_prove = __commonJS({
           computeResults,
           dataQuery
         };
+        let axiomV2QueryAddress;
+        if (blockhashOracle) {
+          if (broadcaster) {
+            throw new Error("Cannot use both broadcaster and blockhash oracle");
+          }
+          if (!targetChainId) {
+            throw new Error("`targetChainId` is required for blockhash oracle bridge type");
+          }
+          axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBlockhashOracleAddress)(sourceChainId, targetChainId);
+        } else if (broadcaster) {
+          if (!targetChainId) {
+            throw new Error("`targetChainId` is required for broadcaster bridge type");
+          }
+          if (!bridgeId) {
+            throw new Error("`bridgeId` is required for broadcaster bridge type");
+          }
+          axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBroadcasterAddress)(sourceChainId, targetChainId, bridgeId);
+        } else {
+          axiomV2QueryAddress = (0, address_1.getAxiomV2QueryAddress)(sourceChainId);
+        }
         let build = await (0, client_1.buildSendQuery)({
           chainId: sourceChainId,
           rpcUrl: rpcUrlOrCache,
-          axiomV2QueryAddress: (0, address_1.getAxiomV2QueryAddress)(sourceChainId),
+          axiomV2QueryAddress,
           dataQuery: res.dataQuery,
           computeQuery: res.computeQuery,
           callback: {
@@ -298,5 +318,5 @@ var prove_1 = require_prove();
 var program = new commander_1.Command("axiom-std");
 program.name("axiom-std").usage("axiom-std CLI");
 program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<rpcUrl>", "JSON-RPC provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
-program.command("prove").description("Prove a circuit").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<rpcUrl>", "JSON-RPC provider to use").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").action(prove_1.prove);
+program.command("prove").description("Prove a circuit and generate query results").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<rpcUrl>", "JSON-RPC provider to use").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").option("-t, --targetChainId [targetChainId]", "target chain id").option("-b, --bridgeId [bridgeId]", "bridge id", parseInt).option("-br, --broadcaster", "Use crosschain broadcaster").option("-bo, --blockhashOracle", "Use crosschain blockhash oracle").action(prove_1.prove);
 program.parseAsync(process.argv);
