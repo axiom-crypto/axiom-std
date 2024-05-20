@@ -95,18 +95,20 @@ contract BaseArrayTest is AxiomTest {
         });
 
         querySchema = axiomVm.readCircuit("test/circuit/array.circuit.ts");
-        client = new MockClient(axiomV2QueryAddress, BASE_CHAIN_ID, querySchema);
+        client = new MockClient(axiomV2QueryAddress, MAINNET_CHAIN_ID, querySchema);
     }
 
     /// @dev Simple demonstration of testing an Axiom client contract using Axiom cheatcodes
-    function test_base() public {
+    function test_base_crosschain() public {
         // create a query into Axiom with default parameters
         Query memory q = query(querySchema, abi.encode(input), address(client));
 
         // send the query to Axiom
-        // q.send();
+        q.send();
 
         // prank fulfillment of the query, returning the Axiom results
         bytes32[] memory results = q.prankFulfill();
+
+        bytes32[] memory expectedResults = q.peekResults();
     }
 }

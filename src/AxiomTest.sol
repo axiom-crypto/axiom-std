@@ -101,6 +101,7 @@ abstract contract AxiomTest is Test {
         _setupAxiomCrosschainFromFork(block.number, sourceChainId, isBlockhashOracle, bridgeId);
 
         axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
+        axiomVm.setCrosschainSettings(sourceChainId, isBlockhashOracle, bridgeId);
     }
 
     /// @dev Create a forked test environment from a specified block and set up crosschain Axiom contracts
@@ -120,6 +121,7 @@ abstract contract AxiomTest is Test {
         _setupAxiomCrosschainFromFork(forkBlock, sourceChainId, isBlockhashOracle, bridgeId);
 
         axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
+        axiomVm.setCrosschainSettings(sourceChainId, isBlockhashOracle, bridgeId);
     }
 
     /// @dev Set up Axiom contracts
