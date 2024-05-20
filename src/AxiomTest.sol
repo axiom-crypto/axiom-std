@@ -43,6 +43,9 @@ abstract contract AxiomTest is Test {
     /// @dev Dummy address for AxiomV2Query used when Axiom is not yet deployed on a chain
     address public constant DUMMY_AXIOM_V2_QUERY_ADDRESS = 0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF;
 
+    /// @dev Dummy address for AxiomV2Query used when crosschain version of Axiom is not yet deployed on a chain
+    address public constant DUMMY_AXIOM_V2_QUERY_CROSSCHAIN_ADDRESS = 0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA;
+
     /// @dev Event emitted when a query is initiated on-chain
     event QueryInitiatedOnchain(
         address indexed caller,
@@ -66,9 +69,7 @@ abstract contract AxiomTest is Test {
 
     /// @dev Create a forked test environment from the latest block and set up Axiom contracts
     /// @param urlOrAlias The URL or alias of the fork to create
-    function _createSelectForkAndSetupAxiom(
-        string memory urlOrAlias
-    ) internal {
+    function _createSelectForkAndSetupAxiom(string memory urlOrAlias) internal {
         vm.createSelectFork(urlOrAlias);
         _setupAxiomFromFork(block.number);
 
@@ -85,11 +86,32 @@ abstract contract AxiomTest is Test {
         axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
     }
 
+    /// @dev Create a forked test environment from the latest block and set up crosschain Axiom contracts
+    /// @param urlOrAlias The URL or alias of the fork to create
+    /// @param sourceChainId The chain ID of the source chain
+    function _createSelectForkAndSetupAxiomCrosschain(string memory urlOrAlias, uint64 sourceChainId) internal {
+        vm.createSelectFork(urlOrAlias);
+        _setupAxiomCrosschainFromFork(block.number, sourceChainId);
+
+        axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
+    }
+
+    /// @dev Create a forked test environment from a specified block and set up crosschain Axiom contracts
+    /// @param urlOrAlias The URL or alias of the fork to create
+    /// @param forkBlock The block number to fork from
+    /// @param sourceChainId The chain ID of the source chain
+    function _createSelectForkAndSetupAxiomCrosschain(string memory urlOrAlias, uint256 forkBlock, uint64 sourceChainId)
+        internal
+    {
+        vm.createSelectFork(urlOrAlias, forkBlock);
+        _setupAxiomCrosschainFromFork(forkBlock, sourceChainId);
+
+        axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
+    }
+
     /// @dev Set up Axiom contracts
     /// @param forkBlock The block number that the fork was created from
-    function _setupAxiomFromFork(
-        uint256 forkBlock
-    ) private {
+    function _setupAxiomFromFork(uint256 forkBlock) private {
         uint64 chainId = uint64(block.chainid);
 
         if (chainId == MAINNET_CHAIN_ID || chainId == BASE_CHAIN_ID) {
@@ -126,6 +148,43 @@ abstract contract AxiomTest is Test {
         }
 
         vm.makePersistent(axiomV2CoreAddress);
+        vm.makePersistent(axiomV2QueryAddress);
+    }
+
+    /// @dev Set up crosschain Axiom contracts
+    /// @param forkBlock The block number that the fork was created from
+    /// @param sourceChainId The chain ID of the source chain
+    function _setupAxiomCrosschainFromFork(uint256 forkBlock, uint64 sourceChainId) private {
+        uint64 chainId = uint64(block.chainid);
+
+        if (chainId == BASE_CHAIN_ID) {
+            /**
+             * for post-deployment
+             *         axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryCrosschainAddress(chainId);
+             *
+             *         require(
+             *             forkBlock >= AxiomV2Addresses.axiomV2QueryCrosschainDeployBlock(chainId),
+             *             "AxiomV2Query not yet deployed at forkBlock"
+             *         );
+             *         axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
+             */
+            axiomV2QueryAddress = DUMMY_AXIOM_V2_QUERY_CROSSCHAIN_ADDRESS;
+        } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
+            /**
+             * for post-deployment
+             *         axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryMockCrosschainAddress(chainId);
+             *
+             *         require(
+             *             forkBlock >= AxiomV2Addresses.axiomV2QueryMockCrosschainDeployBlock(chainId),
+             *             "AxiomV2QueryMock not yet deployed at forkBlock"
+             *         );
+             *         axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
+             */
+            axiomV2QueryAddress = DUMMY_AXIOM_V2_QUERY_CROSSCHAIN_ADDRESS;
+        } else {
+            axiomV2QueryAddress = DUMMY_AXIOM_V2_QUERY_CROSSCHAIN_ADDRESS;
+        }
+
         vm.makePersistent(axiomV2QueryAddress);
     }
 

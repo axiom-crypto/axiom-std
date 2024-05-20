@@ -58,6 +58,25 @@ library AxiomV2Addresses {
         }
     }
 
+    /// @notice Returns the address of the cross-chain version of the AxiomV2Query contract on the chain corresponding to `chainId`
+    /// @param targetChainId The chainId of the AxiomV2Query contract
+    /// @param sourceChainId The chainId of the source chain
+    /// @return addr The address of the AxiomV2Query contract
+    function axiomV2QueryCrosschainAddress(uint64 targetChainId, uint64 sourceChainId)
+        public
+        pure
+        returns (address addr)
+    {
+        if (targetChainId == BASE_CHAIN_ID && sourceChainId == MAINNET_CHAIN_ID) {
+            revert ContractDoesNotExistForChainId();
+        } else {
+            revert ContractDoesNotExistForChainId();
+        }
+        if (addr == address(0)) {
+            revert ContractNotYetDeployed();
+        }
+    }
+
     /// @notice Returns the address of the AxiomV2QueryMock contract on the chain corresponding to `chainId`
     /// @param chainId The chainId of the AxiomV2QueryMock contract
     /// @return addr The address of the AxiomV2QueryMock contract
@@ -68,6 +87,25 @@ library AxiomV2Addresses {
             addr = SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS;
         } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
             addr = BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS;
+        } else {
+            revert ContractDoesNotExistForChainId();
+        }
+        if (addr == address(0)) {
+            revert ContractNotYetDeployed();
+        }
+    }
+
+    /// @notice Returns the address of the AxiomV2QueryMock contract on the chain corresponding to `chainId`
+    /// @param targetChainId The chainId of the AxiomV2QueryMock contract
+    /// @param sourceChainId The chainId of the source chain
+    /// @return addr The address of the AxiomV2QueryMock contract
+    function axiomV2QueryMockCrosschainAddress(uint64 targetChainId, uint64 sourceChainId)
+        public
+        pure
+        returns (address addr)
+    {
+        if (targetChainId == BASE_SEPOLIA_CHAIN_ID && sourceChainId == SEPOLIA_CHAIN_ID) {
+            revert ContractDoesNotExistForChainId();
         } else {
             revert ContractDoesNotExistForChainId();
         }
@@ -123,6 +161,22 @@ library AxiomV2Addresses {
         }
     }
 
+    /// @notice Returns the block number at which the crosschain AxiomV2Query contract was deployed on the chain corresponding to `targetChainId`
+    /// @param targetChainId The chainId of the AxiomV2Query contract
+    /// @param sourceChainId The chainId of the source chain
+    /// @return blockNumber The block number at which the AxiomV2Query contract was deployed
+    function axiomV2QueryCrosschainDeployBlock(uint64 targetChainId, uint64 sourceChainId)
+        public
+        pure
+        returns (uint256 blockNumber)
+    {
+        if (targetChainId == BASE_CHAIN_ID && sourceChainId == MAINNET_CHAIN_ID) {
+            revert ContractDoesNotExistForChainId();
+        } else {
+            revert ContractDoesNotExistForChainId();
+        }
+    }
+
     /// @notice Returns the block number at which the AxiomV2QueryMock contract was deployed on the chain corresponding to `chainId`
     /// @param chainId The chainId of the AxiomV2QueryMock contract
     /// @return blockNumber The block number at which the AxiomV2QueryMock contract was deployed
@@ -133,6 +187,22 @@ library AxiomV2Addresses {
             blockNumber = SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK;
         } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
             blockNumber = BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK;
+        } else {
+            revert ContractDoesNotExistForChainId();
+        }
+    }
+
+    /// @notice Returns the block number at which the crosschain AxiomV2QueryMock contract was deployed on the chain corresponding to `targetChainId`
+    /// @param targetChainId The chainId of the AxiomV2QueryMock contract
+    /// @param sourceChainId The chainId of the source chain
+    /// @return blockNumber The block number at which the AxiomV2QueryMock contract was deployed
+    function axiomV2QueryMockCrosschainDeployBlock(uint64 targetChainId, uint64 sourceChainId)
+        public
+        pure
+        returns (uint256 blockNumber)
+    {
+        if (targetChainId == BASE_SEPOLIA_CHAIN_ID && sourceChainId == SEPOLIA_CHAIN_ID) {
+            revert ContractDoesNotExistForChainId();
         } else {
             revert ContractDoesNotExistForChainId();
         }
