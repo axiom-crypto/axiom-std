@@ -89,9 +89,16 @@ abstract contract AxiomTest is Test {
     /// @dev Create a forked test environment from the latest block and set up crosschain Axiom contracts
     /// @param urlOrAlias The URL or alias of the fork to create
     /// @param sourceChainId The chain ID of the source chain
-    function _createSelectForkAndSetupAxiomCrosschain(string memory urlOrAlias, uint64 sourceChainId) internal {
+    /// @param isBlockhashOracle Whether the bridging is via a blockhash oracle
+    /// @param bridgeId The ID of the bridge
+    function _createSelectForkAndSetupAxiomCrosschain(
+        string memory urlOrAlias,
+        uint64 sourceChainId,
+        bool isBlockhashOracle,
+        uint8 bridgeId
+    ) internal {
         vm.createSelectFork(urlOrAlias);
-        _setupAxiomCrosschainFromFork(block.number, sourceChainId);
+        _setupAxiomCrosschainFromFork(block.number, sourceChainId, isBlockhashOracle, bridgeId);
 
         axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
     }
@@ -100,11 +107,17 @@ abstract contract AxiomTest is Test {
     /// @param urlOrAlias The URL or alias of the fork to create
     /// @param forkBlock The block number to fork from
     /// @param sourceChainId The chain ID of the source chain
-    function _createSelectForkAndSetupAxiomCrosschain(string memory urlOrAlias, uint256 forkBlock, uint64 sourceChainId)
-        internal
-    {
+    /// @param isBlockhashOracle Whether the bridging is via a blockhash oracle
+    /// @param bridgeId The ID of the bridge
+    function _createSelectForkAndSetupAxiomCrosschain(
+        string memory urlOrAlias,
+        uint256 forkBlock,
+        uint64 sourceChainId,
+        bool isBlockhashOracle,
+        uint8 bridgeId
+    ) internal {
         vm.createSelectFork(urlOrAlias, forkBlock);
-        _setupAxiomCrosschainFromFork(forkBlock, sourceChainId);
+        _setupAxiomCrosschainFromFork(forkBlock, sourceChainId, isBlockhashOracle, bridgeId);
 
         axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
     }
@@ -154,10 +167,17 @@ abstract contract AxiomTest is Test {
     /// @dev Set up crosschain Axiom contracts
     /// @param forkBlock The block number that the fork was created from
     /// @param sourceChainId The chain ID of the source chain
-    function _setupAxiomCrosschainFromFork(uint256 forkBlock, uint64 sourceChainId) private {
+    /// @param isBlockhashOracle Whether the bridging is via a blockhash oracle
+    /// @param bridgeId The ID of the bridge
+    function _setupAxiomCrosschainFromFork(
+        uint256 forkBlock,
+        uint64 sourceChainId,
+        bool isBlockhashOracle,
+        uint8 bridgeId
+    ) private {
         uint64 chainId = uint64(block.chainid);
 
-        if (chainId == BASE_CHAIN_ID) {
+        if (chainId == BASE_CHAIN_ID && isBlockhashOracle) {
             /**
              * for post-deployment
              *         axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryCrosschainAddress(chainId);
@@ -169,7 +189,7 @@ abstract contract AxiomTest is Test {
              *         axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
              */
             axiomV2QueryAddress = DUMMY_AXIOM_V2_QUERY_CROSSCHAIN_ADDRESS;
-        } else if (chainId == BASE_SEPOLIA_CHAIN_ID) {
+        } else if (chainId == BASE_SEPOLIA_CHAIN_ID && isBlockhashOracle) {
             /**
              * for post-deployment
              *         axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryMockCrosschainAddress(chainId);
