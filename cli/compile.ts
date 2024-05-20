@@ -5,13 +5,13 @@ import { encodeAbiParameters, parseAbiParameters } from "viem";
 
 export const compile = async (
     circuitPath: string,
-    providerUri: string,
+    rpcUrl: string,
     options: { overrideQuerySchema?: string }
 ) => {
     const { restoreConsole, getCaptures } = redirectConsole();
     let circuitFunction = "circuit";
     const f = await getFunctionFromTs(circuitPath, circuitFunction);
-    const provider = getProvider(providerUri);
+    const provider = getProvider(rpcUrl);
     const circuit = new AxiomBaseCircuit({
         f: f.circuit,
         mock: true,

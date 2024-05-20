@@ -161,11 +161,11 @@ var require_compile = __commonJS({
     var utils_12 = require("@axiom-crypto/circuit/cliHandler/utils");
     var utils_22 = require_utils();
     var viem_12 = require("viem");
-    var compile = async (circuitPath, providerUri2, options) => {
+    var compile = async (circuitPath, rpcUrl2, options) => {
       const { restoreConsole: restoreConsole2, getCaptures: getCaptures2 } = (0, utils_22.redirectConsole)();
       let circuitFunction = "circuit";
       const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
-      const provider2 = (0, utils_12.getProvider)(providerUri2);
+      const provider2 = (0, utils_12.getProvider)(rpcUrl2);
       const circuit2 = new js_12.AxiomBaseCircuit({
         f: f.circuit,
         mock: true,
@@ -217,10 +217,11 @@ var require_prove = __commonJS({
     var viem_1 = require("viem");
     var client_1 = require("@axiom-crypto/client");
     var utils_3 = require("@axiom-crypto/client/axiom/utils");
-    var prove = async (compiledJson, inputs, providerUri, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
+    var address_1 = require("@axiom-crypto/client/lib/address");
+    var prove = async (compiledJson, inputs, rpcUrl, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
       const { restoreConsole, getCaptures } = (0, utils_2.redirectConsole)();
       const decoder = new TextDecoder();
-      const provider = (0, utils_1.getProvider)(providerUri);
+      const provider = (0, utils_1.getProvider)(rpcUrl);
       let compiled = JSON.parse(compiledJson);
       const decodedArray = Buffer.from(compiled.circuit, "base64");
       const raw = decoder.decode(decodedArray);
@@ -248,7 +249,8 @@ var require_prove = __commonJS({
         };
         let build = await (0, client_1.buildSendQuery)({
           chainId: sourceChainId,
-          providerUri: provider,
+          rpcUrl: provider,
+          axiomV2QueryAddress: (0, address_1.getAxiomV2QueryAddress)(sourceChainId),
           dataQuery: res.dataQuery,
           computeQuery: res.computeQuery,
           callback: {
@@ -295,6 +297,6 @@ var compile_1 = require_compile();
 var prove_1 = require_prove();
 var program = new commander_1.Command("axiom-std");
 program.name("axiom-std").usage("axiom-std CLI");
-program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<providerUri>", "provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
-program.command("prove").description("Prove a circuit").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<providerUri>", "provider to use").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").action(prove_1.prove);
+program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<rpcUrl>", "JSON-RPC provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
+program.command("prove").description("Prove a circuit").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<rpcUrl>", "JSON-RPC provider to use").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").action(prove_1.prove);
 program.parseAsync(process.argv);

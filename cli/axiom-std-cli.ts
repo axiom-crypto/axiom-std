@@ -9,7 +9,7 @@ program.name("axiom-std").usage("axiom-std CLI");
 program.command("readCircuit")
     .description("Read and compile a circuit")
     .argument("<circuitPath>", "path to the typescript circuit file")
-    .argument("<providerUri>", "provider to use")
+    .argument("<rpcUrl>", "JSON-RPC provider to use")
     .option("-q, --override-query-schema <suffix>", "query schema")
     .action(compile);
 
@@ -17,7 +17,7 @@ program.command("prove")
     .description("Prove a circuit")
     .argument("<compiledJson>", "compiled json string")
     .argument("<inputs>", "inputs to the circuit")
-    .argument("<providerUri>", "provider to use")
+    .argument("<rpcUrl>", "JSON-RPC provider to use")
     .argument("<sourceChainId>", "source chain id")
     .argument("<callbackTarget>", "callback target")
     .argument("<callbackExtraData>", "callback extra data")

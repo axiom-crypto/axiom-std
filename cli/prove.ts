@@ -4,11 +4,12 @@ import { getInputs, redirectConsole } from './utils';
 import { encodeAbiParameters, parseAbiParameters } from 'viem';
 import { buildSendQuery } from "@axiom-crypto/client";
 import { argsArrToObj } from '@axiom-crypto/client/axiom/utils';
+import { getAxiomV2QueryAddress } from '@axiom-crypto/client/lib/address';
 
 export const prove = async (
     compiledJson: string,
     inputs: string,
-    providerUri: string,
+    rpcUrl: string,
     sourceChainId: string,
     callbackTarget: string,
     callbackExtraData: string,
@@ -20,7 +21,7 @@ export const prove = async (
     const { restoreConsole, getCaptures } = redirectConsole();
     const decoder = new TextDecoder();
 
-    const provider = getProvider(providerUri);
+    const provider = getProvider(rpcUrl);
     let compiled = JSON.parse(compiledJson);
 
     const decodedArray = Buffer.from(compiled.circuit, 'base64');
@@ -55,7 +56,8 @@ export const prove = async (
 
         let build = await buildSendQuery({
             chainId: sourceChainId,
-            providerUri: provider,
+            rpcUrl: provider,
+            axiomV2QueryAddress: getAxiomV2QueryAddress(sourceChainId),   
             dataQuery: res.dataQuery,
             computeQuery: res.computeQuery,
             callback: {
