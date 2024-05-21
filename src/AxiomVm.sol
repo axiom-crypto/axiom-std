@@ -122,16 +122,25 @@ library Axiom {
 /// @dev A contract that provides cheatcodes for testing the AxiomV2Query contract
 contract AxiomVm is Test {
     /// @dev Path to the Axiom CLI
-    string CLI_PATH;
+    string public CLI_PATH;
 
     /// @dev Command to run node scripts
-    string NODE_PATH;
+    string public NODE_PATH;
 
     /// @dev The URL or alias of the JSON RPC provider
-    string urlOrAlias;
+    string public urlOrAlias;
 
     address public axiomV2QueryAddress;
     mapping(bytes32 => string) compiledStrings;
+
+    /// @dev Boolean indicating if the circuit is a Rust circuit
+    bool public isRustCircuit;
+
+    /// @dev Default dummy query schema for Rust circuits
+    bytes32 constant DEFAULT_RUST_QUERY_SCHEMA = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+
+    /// @dev Circuit path for Rust circuits
+    string public rustCircuitPath;
 
     constructor(address _axiomV2QueryAddress, string memory _urlOrAlias) {
         axiomV2QueryAddress = _axiomV2QueryAddress;
@@ -251,6 +260,17 @@ contract AxiomVm is Test {
         logOutput("Compile", logs, errors, "Circuit compilation failed");
         querySchema = bytes32(vm.parseJson(build, ".querySchema"));
         compiledStrings[querySchema] = build;
+    }
+
+    /**
+     * @dev Compiles a Rust circuit using the Axiom CLI via FFI
+     * @param _rustCircuitPath path to the Rust circuit file
+     * @return querySchema
+     */
+    function readRustCircuit(string memory _rustCircuitPath) public returns (bytes32 querySchema) {
+        isRustCircuit = true;
+        rustCircuitPath = _rustCircuitPath;
+        querySchema = DEFAULT_RUST_QUERY_SCHEMA;
     }
 
     /**
@@ -489,6 +509,20 @@ contract AxiomVm is Test {
         bytes memory callbackExtraData,
         IAxiomV2Query.AxiomV2FeeData memory feeData
     ) internal returns (string memory output) {
+        if (!isRustCircuit) {
+            output = _runJsCircuit(querySchema, input, callbackTarget, callbackExtraData, feeData);
+        } else {
+            output = _runRustCircuit(querySchema, input, callbackTarget, callbackExtraData, feeData);
+        }
+    }
+
+    function _runJsCircuit(
+        bytes32 querySchema,
+        bytes memory input,
+        address callbackTarget,
+        bytes memory callbackExtraData,
+        IAxiomV2Query.AxiomV2FeeData memory feeData
+    ) internal returns (string memory output) {
         require(bytes(compiledStrings[querySchema]).length > 0, "Circuit has not been compiled. Run `compile` first.");
         string[] memory cli = new string[](13);
         cli[0] = NODE_PATH;
@@ -509,6 +543,33 @@ contract AxiomVm is Test {
         (string memory logs, string memory errors, string memory build) =
             abi.decode(axiomOutput, (string, string, string));
         logOutput("Prove", logs, errors, "Circuit proving failed");
+        output = build;
+    }
+
+    function _runRustCircuit(
+        bytes32 querySchema,
+        bytes memory input,
+        address callbackTarget,
+        bytes memory callbackExtraData,
+        IAxiomV2Query.AxiomV2FeeData memory feeData
+    ) internal returns (string memory output) {
+        // TODO: finish this call
+        string[] memory cli = new string[](11);
+        cli[0] = "cargo";
+        cli[1] = "run";
+        cli[2] = "--circuit";
+        cli[3] = "main";
+        cli[4] = "--";
+        cli[5] = "witness-gen";
+        cli[6] = "--input";
+        cli[7] = "data/input.json";
+        cli[8] = "-k";
+        cli[9] = "12";
+        cli[10] = "-p";
+
+        bytes memory axiomOutput = vm.ffi(cli);
+        (string memory logs, string memory errors, string memory build) =
+            abi.decode(axiomOutput, (string, string, string));
         output = build;
     }
 

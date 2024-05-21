@@ -66,9 +66,7 @@ abstract contract AxiomTest is Test {
 
     /// @dev Create a forked test environment from the latest block and set up Axiom contracts
     /// @param urlOrAlias The URL or alias of the fork to create
-    function _createSelectForkAndSetupAxiom(
-        string memory urlOrAlias
-    ) internal {
+    function _createSelectForkAndSetupAxiom(string memory urlOrAlias) internal {
         vm.createSelectFork(urlOrAlias);
         _setupAxiomFromFork(block.number);
 
@@ -87,9 +85,7 @@ abstract contract AxiomTest is Test {
 
     /// @dev Set up Axiom contracts
     /// @param forkBlock The block number that the fork was created from
-    function _setupAxiomFromFork(
-        uint256 forkBlock
-    ) private {
+    function _setupAxiomFromFork(uint256 forkBlock) private {
         uint64 chainId = uint64(block.chainid);
 
         if (chainId == MAINNET_CHAIN_ID || chainId == BASE_CHAIN_ID) {
