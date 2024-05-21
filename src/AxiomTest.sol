@@ -179,13 +179,13 @@ abstract contract AxiomTest is Test {
     ) private {
         uint64 chainId = uint64(block.chainid);
 
-        if (chainId == BASE_CHAIN_ID && isBlockhashOracle) {
+        if (chainId == BASE_CHAIN_ID && sourceChainId == MAINNET_CHAIN_ID && isBlockhashOracle) {
             /**
              * for post-deployment
-             *         axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryCrosschainAddress(chainId);
+             *         axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryCrosschainAddress(chainId, sourceChainId, isBlockhashOracle, bridgeId);
              *
              *         require(
-             *             forkBlock >= AxiomV2Addresses.axiomV2QueryCrosschainDeployBlock(chainId),
+             *             forkBlock >= AxiomV2Addresses.axiomV2QueryCrosschainDeployBlock(chainId, sourceChainId, isBlockhashOracle, bridgeId),
              *             "AxiomV2Query not yet deployed at forkBlock"
              *         );
              *         axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
@@ -194,10 +194,10 @@ abstract contract AxiomTest is Test {
         } else if (chainId == BASE_SEPOLIA_CHAIN_ID && isBlockhashOracle) {
             /**
              * for post-deployment
-             *         axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryMockCrosschainAddress(chainId);
+             *         axiomV2QueryAddress = AxiomV2Addresses.axiomV2QueryMockCrosschainAddress(chainId, sourceChainId, isBlockhashOracle, bridgeId);
              *
              *         require(
-             *             forkBlock >= AxiomV2Addresses.axiomV2QueryMockCrosschainDeployBlock(chainId),
+             *             forkBlock >= AxiomV2Addresses.axiomV2QueryMockCrosschainDeployBlock(chainId, sourceChainId, isBlockhashOracle, bridgeId),
              *             "AxiomV2QueryMock not yet deployed at forkBlock"
              *         );
              *         axiomV2Query = IAxiomV2Query(axiomV2QueryAddress);
