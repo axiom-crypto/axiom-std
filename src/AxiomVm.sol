@@ -150,6 +150,9 @@ contract AxiomVm is Test {
     /// @dev The bridge ID
     uint8 public bridgeId;
 
+    /// @dev The JSON-RPC URL or alias for the target chain
+    string public targetUrlOrAlias;
+
     /// @dev Mapping of querySchema to compiled circuit strings
     mapping(bytes32 => string) compiledStrings;
 
@@ -215,12 +218,19 @@ contract AxiomVm is Test {
      * @param _sourceChainId the source chain ID
      * @param _isBlockhashOracle whether the contract is a blockhash oracle
      * @param _bridgeId the bridge ID
+     * @param _targetUrlOrAlias the JSON-RPC URL or alias for the target chain
      */
-    function setCrosschainSettings(uint64 _sourceChainId, bool _isBlockhashOracle, uint8 _bridgeId) external {
+    function setCrosschainSettings(
+        uint64 _sourceChainId,
+        bool _isBlockhashOracle,
+        uint8 _bridgeId,
+        string calldata _targetUrlOrAlias
+    ) external {
         isCrosschain = true;
         sourceChainId = _sourceChainId;
         isBlockhashOracle = _isBlockhashOracle;
         bridgeId = _bridgeId;
+        targetUrlOrAlias = _targetUrlOrAlias;
     }
 
     /**
@@ -538,7 +548,7 @@ contract AxiomVm is Test {
                 cli[17] = "-br";
             }
             cli[18] = "-tr";
-            cli[19] = vm.rpcUrl(block.chainid);
+            cli[19] = vm.rpcUrl(targetUrlOrAlias);
         }
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;

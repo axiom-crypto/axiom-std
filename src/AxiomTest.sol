@@ -87,41 +87,45 @@ abstract contract AxiomTest is Test {
     }
 
     /// @dev Create a forked test environment from the latest block and set up crosschain Axiom contracts
-    /// @param urlOrAlias The URL or alias of the fork to create
+    /// @param targetUrlOrAlias The URL or alias of the RPC for the target chain, which is forked
+    /// @param sourceUrlOrAlias The URL or alias of the RPC for the source chain
     /// @param sourceChainId The chain ID of the source chain
     /// @param isBlockhashOracle Whether the bridging is via a blockhash oracle
     /// @param bridgeId The ID of the bridge
     function _createSelectForkAndSetupAxiomCrosschain(
-        string memory urlOrAlias,
+        string memory targetUrlOrAlias,
+        string memory sourceUrlOrAlias,
         uint64 sourceChainId,
         bool isBlockhashOracle,
         uint8 bridgeId
     ) internal {
-        vm.createSelectFork(urlOrAlias);
+        vm.createSelectFork(targetUrlOrAlias);
         _setupAxiomCrosschainFromFork(block.number, sourceChainId, isBlockhashOracle, bridgeId);
 
-        axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
-        axiomVm.setCrosschainSettings(sourceChainId, isBlockhashOracle, bridgeId);
+        axiomVm = new AxiomVm(axiomV2QueryAddress, sourceUrlOrAlias);
+        axiomVm.setCrosschainSettings(sourceChainId, isBlockhashOracle, bridgeId, targetUrlOrAlias);
     }
 
     /// @dev Create a forked test environment from a specified block and set up crosschain Axiom contracts
-    /// @param urlOrAlias The URL or alias of the fork to create
+    /// @param targetUrlOrAlias The URL or alias of the RPC for the target chain, which is forked
+    /// @param sourceUrlOrAlias The URL or alias of the RPC for the source chain
     /// @param forkBlock The block number to fork from
     /// @param sourceChainId The chain ID of the source chain
     /// @param isBlockhashOracle Whether the bridging is via a blockhash oracle
     /// @param bridgeId The ID of the bridge
     function _createSelectForkAndSetupAxiomCrosschain(
-        string memory urlOrAlias,
+        string memory targetUrlOrAlias,
+        string memory sourceUrlOrAlias,
         uint256 forkBlock,
         uint64 sourceChainId,
         bool isBlockhashOracle,
         uint8 bridgeId
     ) internal {
-        vm.createSelectFork(urlOrAlias, forkBlock);
+        vm.createSelectFork(targetUrlOrAlias, forkBlock);
         _setupAxiomCrosschainFromFork(forkBlock, sourceChainId, isBlockhashOracle, bridgeId);
 
-        axiomVm = new AxiomVm(axiomV2QueryAddress, urlOrAlias);
-        axiomVm.setCrosschainSettings(sourceChainId, isBlockhashOracle, bridgeId);
+        axiomVm = new AxiomVm(axiomV2QueryAddress, sourceUrlOrAlias);
+        axiomVm.setCrosschainSettings(sourceChainId, isBlockhashOracle, bridgeId, targetUrlOrAlias);
     }
 
     /// @dev Set up Axiom contracts
