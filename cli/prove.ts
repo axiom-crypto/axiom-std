@@ -25,6 +25,7 @@ export const prove = async (
     bridgeId?: number,
     broadcaster?: boolean,
     blockhashOracle?: boolean,
+    targetRpcUrl?: string,
 ) => {
     const { restoreConsole, getCaptures } = redirectConsole();
     const decoder = new TextDecoder();
@@ -83,6 +84,14 @@ export const prove = async (
             axiomV2QueryAddress = getAxiomV2QueryAddress(sourceChainId);
         }
 
+        let target;
+        if (blockhashOracle || broadcaster) {
+            let targetRpcUrlOrCache = getRpcUrl(targetRpcUrl!);
+            target = {
+                chainId: targetChainId!,
+                rpcUrl: targetRpcUrlOrCache,
+            };
+        }
         let build = await buildSendQuery({
             chainId: sourceChainId,
             rpcUrl: rpcUrlOrCache,
@@ -93,6 +102,7 @@ export const prove = async (
                 target: callbackTarget,
                 extraData: callbackExtraData,
             },
+            target,
             caller: caller,
             mock: false,
             options: {

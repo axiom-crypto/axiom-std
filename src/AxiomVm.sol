@@ -527,7 +527,7 @@ contract AxiomVm is Test {
         if (!isCrosschain) {
             cli = new string[](13);
         } else {
-            cli = new string[](18);
+            cli = new string[](20);
             cli[13] = "-t";
             cli[14] = vm.toString(block.chainid);
             cli[15] = "-b";
@@ -537,6 +537,8 @@ contract AxiomVm is Test {
             } else {
                 cli[17] = "-br";
             }
+            cli[18] = "-tr";
+            cli[19] = vm.rpcUrl(block.chainid);
         }
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;

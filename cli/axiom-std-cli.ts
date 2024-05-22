@@ -17,7 +17,7 @@ program.command("prove")
     .description("Prove a circuit and generate query results")
     .argument("<compiledJson>", "compiled json string")
     .argument("<inputs>", "inputs to the circuit")
-    .argument("<rpcUrl>", "JSON-RPC provider to use")
+    .argument("<rpcUrl>", "JSON-RPC provider to use for the source chain")
     .argument("<sourceChainId>", "source chain id")
     .argument("<callbackTarget>", "callback target")
     .argument("<callbackExtraData>", "callback extra data")
@@ -28,7 +28,8 @@ program.command("prove")
     .option("-t, --targetChainId [targetChainId]", "target chain id")
     .option("-b, --bridgeId [bridgeId]", "bridge id", parseInt)
     .option("-br, --broadcaster", "Use crosschain broadcaster")
-    .option("-bo, --blockhashOracle", "Use crosschain blockhash oracle")    
+    .option("-bo, --blockhashOracle", "Use crosschain blockhash oracle")
+    .option("-tr, --targetRpcUrl [targetRpcUrl]", "JSON-RPC provider to use for the target chain")    
     .action(prove);
 
 program.parseAsync(process.argv);
