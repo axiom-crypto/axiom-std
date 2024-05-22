@@ -71,7 +71,7 @@ export const prove = async (
             if (!targetChainId) {
                 throw new Error("`targetChainId` is required for blockhash oracle bridge type");
             }
-            axiomV2QueryAddress = getAxiomV2QueryBlockhashOracleAddress(sourceChainId, targetChainId);
+            axiomV2QueryAddress = getAxiomV2QueryBlockhashOracleAddress({sourceChainId, targetChainId});
         } else if (broadcaster) {
             if (!targetChainId) {
                 throw new Error("`targetChainId` is required for broadcaster bridge type");
@@ -79,14 +79,14 @@ export const prove = async (
             if (!bridgeId) {
                 throw new Error("`bridgeId` is required for broadcaster bridge type");
             }
-            axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress(sourceChainId, targetChainId, bridgeId);
+            axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress({sourceChainId, targetChainId, bridgeId});
         } else {
             axiomV2QueryAddress = getAxiomV2QueryAddress(sourceChainId);
         }
 
         let target;
         if (blockhashOracle || broadcaster) {
-            let targetRpcUrlOrCache = getRpcUrl(targetRpcUrl!);
+            const targetRpcUrlOrCache = getRpcUrl(targetRpcUrl);
             target = {
                 chainId: targetChainId!,
                 rpcUrl: targetRpcUrlOrCache,

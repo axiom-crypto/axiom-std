@@ -255,7 +255,7 @@ var require_prove = __commonJS({
           if (!targetChainId) {
             throw new Error("`targetChainId` is required for blockhash oracle bridge type");
           }
-          axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBlockhashOracleAddress)(sourceChainId, targetChainId);
+          axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBlockhashOracleAddress)({ sourceChainId, targetChainId });
         } else if (broadcaster) {
           if (!targetChainId) {
             throw new Error("`targetChainId` is required for broadcaster bridge type");
@@ -263,13 +263,13 @@ var require_prove = __commonJS({
           if (!bridgeId) {
             throw new Error("`bridgeId` is required for broadcaster bridge type");
           }
-          axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBroadcasterAddress)(sourceChainId, targetChainId, bridgeId);
+          axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBroadcasterAddress)({ sourceChainId, targetChainId, bridgeId });
         } else {
           axiomV2QueryAddress = (0, address_1.getAxiomV2QueryAddress)(sourceChainId);
         }
         let target;
         if (blockhashOracle || broadcaster) {
-          let targetRpcUrlOrCache = (0, utils_1.getRpcUrl)(targetRpcUrl);
+          const targetRpcUrlOrCache = (0, utils_1.getRpcUrl)(targetRpcUrl);
           target = {
             chainId: targetChainId,
             rpcUrl: targetRpcUrlOrCache
@@ -326,6 +326,6 @@ var compile_1 = require_compile();
 var prove_1 = require_prove();
 var program = new commander_1.Command("axiom-std");
 program.name("axiom-std").usage("axiom-std CLI");
-program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<rpcUrl>", "JSON-RPC provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
-program.command("prove").description("Prove a circuit and generate query results").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<rpcUrl>", "JSON-RPC provider to use for the source chain").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").option("-t, --targetChainId [targetChainId]", "target chain id").option("-b, --bridgeId [bridgeId]", "bridge id", parseInt).option("-br, --broadcaster", "Use crosschain broadcaster").option("-bo, --blockhashOracle", "Use crosschain blockhash oracle").option("-tr, --targetRpcUrl [targetRpcUrl]", "JSON-RPC provider to use for the target chain").action(prove_1.prove);
+program.command("read-circuit").description("Read and compile a circuit").argument("<circuit-path>", "path to the typescript circuit file").argument("<rpc-url>", "JSON-RPC provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
+program.command("prove").description("Prove a circuit and generate query results").argument("<compiled-json>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<rpc-url>", "JSON-RPC provider to use for the source chain").argument("<source-chain-id>", "source chain id").argument("<callback-target>", "callback target").argument("<callback-extra-data>", "callback extra data").argument("<refund-address>", "refund address").argument("<max-fee-per-gas>", "max fee per gas").argument("<callback-gas-limit>", "callback gas limit").argument("<caller>", "caller").option("-t, --target-chain-id <target-chain-id>", "target chain id").option("-b, --bridge-id <bridge-id>", "bridge id", parseInt).option("-br, --broadcaster", "Use crosschain broadcaster").option("-bo, --blockhash-oracle", "Use crosschain blockhash oracle").option("-tr, --target-rpc-url <target-rpc-url>", "JSON-RPC provider to use for the target chain").action(prove_1.prove);
 program.parseAsync(process.argv);
