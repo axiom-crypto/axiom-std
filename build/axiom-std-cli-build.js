@@ -267,7 +267,7 @@ var require_prove = __commonJS({
           if (!bridgeId) {
             throw new Error("`bridgeId` is required for broadcaster bridge type");
           }
-          if (sourceChainId == "1" && targetChainId == "8453") {
+          if (false) {
             axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBroadcasterAddress)({ sourceChainId, targetChainId, bridgeId });
           } else {
             axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";

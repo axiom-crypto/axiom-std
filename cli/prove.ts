@@ -83,8 +83,8 @@ export const prove = async (
             if (!bridgeId) {
                 throw new Error("`bridgeId` is required for broadcaster bridge type");
             }
-            if (sourceChainId == "1" && targetChainId == "8453") {
-                axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress({sourceChainId, targetChainId, bridgeId});
+            if (false) {
+                axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress({sourceChainId, targetChainId: targetChainId!, bridgeId: bridgeId!});
             } else {
                 axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
             }
