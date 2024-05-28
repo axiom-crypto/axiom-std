@@ -6,11 +6,11 @@ settings:
 
 dependencies:
   '@axiom-crypto/circuit':
-    specifier: 2.1.0-alpha.7
-    version: 2.1.0-alpha.7(typescript@5.4.5)
+    specifier: 2.1.0-alpha.12
+    version: 2.1.0-alpha.12(typescript@5.4.5)
   '@axiom-crypto/client':
-    specifier: 2.1.0-alpha.7
-    version: 2.1.0-alpha.7(typescript@5.4.5)
+    specifier: 2.1.0-alpha.12
+    version: 2.1.0-alpha.12(typescript@5.4.5)
   commander:
     specifier: ^11.1.0
     version: 11.1.0
@@ -18,8 +18,8 @@ dependencies:
     specifier: ^16.4.5
     version: 16.4.5
   viem:
-    specifier: ^2.12.0
-    version: 2.12.0(typescript@5.4.5)
+    specifier: ^2.13.1
+    version: 2.13.1(typescript@5.4.5)
 
 devDependencies:
   '@types/node':
@@ -42,15 +42,15 @@ packages:
     resolution: {integrity: sha512-96Z2IP3mYmF1Xg2cDm8f1gWGf/HUVedQ3FMifV4kG/PQ4yEP51xDtRAEfhVNt5f/uzpNkZHwWQuUcu6D6K+Ekw==}
     dev: false
 
-  /@axiom-crypto/circuit@2.1.0-alpha.7(typescript@5.4.5):
-    resolution: {integrity: sha512-zD6pBNhiXi9QuMnxm8XJQ9PH763Yb34fDBY++4ZKDkAZ7qwZs6iIXOnNx9Ormrn1w+EhoCEUDymUCz1TgTGAqQ==}
+  /@axiom-crypto/circuit@2.1.0-alpha.12(typescript@5.4.5):
+    resolution: {integrity: sha512-QH+8s7ophckVwUKKg+2l6mhvkwBV6YyW3HvWJDMrXTdLRhvDIohCC8V+LgYM4TLPIQpy9OnJfAxaOobU8TMAew==}
     dependencies:
       '@axiom-crypto/halo2-lib-js': 0.3.4
       '@axiom-crypto/halo2-wasm': 0.3.4
       '@axiom-crypto/tools': 2.1.1
       commander: 11.1.0
       ethers: 6.12.1
-      viem: 2.12.0(typescript@5.4.5)
+      viem: 2.13.1(typescript@5.4.5)
     transitivePeerDependencies:
       - bufferutil
       - debug
@@ -59,11 +59,11 @@ packages:
       - zod
     dev: false
 
-  /@axiom-crypto/client@2.1.0-alpha.7(typescript@5.4.5):
-    resolution: {integrity: sha512-fx2L/rOgyIhYL8bP8HfNZ0NFRY6KruxrfqYKZSu1tzJLsYcFF1E7GcVVrK/hMetecyP3AuNEmsN6iyK9uWTHUA==}
+  /@axiom-crypto/client@2.1.0-alpha.12(typescript@5.4.5):
+    resolution: {integrity: sha512-OpVFG9Lb7CZezei7tKHqOH6BB5DbRUBPXwrNXLoxmSjM/nhZOqMcJdEiceFPkSJubc4xT3Ij6lMYeHjNHi+/XQ==}
     hasBin: true
     dependencies:
-      '@axiom-crypto/circuit': 2.1.0-alpha.7(typescript@5.4.5)
+      '@axiom-crypto/circuit': 2.1.0-alpha.12(typescript@5.4.5)
       chalk: 4.1.2
       commander: 11.1.0
       prompts: 2.4.2
@@ -576,8 +576,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  /viem@2.12.0(typescript@5.4.5):
-    resolution: {integrity: sha512-XBvORspE4x2/gfy7idH6IVFwkJiXirygFCU3lxUH6fttsj8zufLtgiokfvZF/LAZUEDvdxSgL08whSYgffM2fw==}
+  /viem@2.13.1(typescript@5.4.5):
+    resolution: {integrity: sha512-QaSCtPXb9uVaba+vOsyCFX21BDWNbjBOuXIWWlQXLmECtr/mbJ64XUHyFz6KLvUwAsQ+vxUQVwgmXc3jVMxwYw==}
     peerDependencies:
       typescript: '>=5.0.4'
     peerDependenciesMeta:
