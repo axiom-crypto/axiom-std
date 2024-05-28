@@ -65,7 +65,7 @@ contract MockClient is AxiomV2Client {
     }
 }
 
-contract BaseArrayTest is AxiomTest {
+contract BaseCrosschainArrayTest is AxiomTest {
     using Axiom for Query;
 
     struct AxiomInput {

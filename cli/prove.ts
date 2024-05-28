@@ -98,7 +98,7 @@ export const prove = async (
 
         let target;
         if (blockhashOracle || broadcaster) {
-            let targetRpcUrlOrCache = getRpcUrl(targetRpcUrl!);
+            const targetRpcUrlOrCache = getRpcUrl(targetRpcUrl);
             target = {
                 chainId: targetChainId!,
                 rpcUrl: targetRpcUrlOrCache,

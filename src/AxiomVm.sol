@@ -264,7 +264,7 @@ contract AxiomVm is Test {
         string[] memory cli = new string[](5);
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
-        cli[2] = "readCircuit";
+        cli[2] = "read-circuit";
         cli[3] = _circuitPath;
         cli[4] = vm.rpcUrl(urlOrAlias);
         bytes memory axiomOutput = vm.ffi(cli);
@@ -285,7 +285,7 @@ contract AxiomVm is Test {
         string[] memory cli = new string[](7);
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
-        cli[2] = "readCircuit";
+        cli[2] = "read-circuit";
         cli[3] = _circuitPath;
         cli[4] = vm.rpcUrl(urlOrAlias);
         cli[5] = "--override-query-schema";
