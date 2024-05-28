@@ -71,7 +71,11 @@ export const prove = async (
             if (!targetChainId) {
                 throw new Error("`targetChainId` is required for blockhash oracle bridge type");
             }
-            axiomV2QueryAddress = getAxiomV2QueryBlockhashOracleAddress(sourceChainId, targetChainId);
+            if (sourceChainId == "1" && targetChainId == "8453") {
+                axiomV2QueryAddress = getAxiomV2QueryBlockhashOracleAddress(sourceChainId, targetChainId);
+            } else {
+                axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+            }
         } else if (broadcaster) {
             if (!targetChainId) {
                 throw new Error("`targetChainId` is required for broadcaster bridge type");
@@ -79,9 +83,17 @@ export const prove = async (
             if (!bridgeId) {
                 throw new Error("`bridgeId` is required for broadcaster bridge type");
             }
-            axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress(sourceChainId, targetChainId, bridgeId);
+            if (sourceChainId == "1" && targetChainId == "8453") {
+                axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress(sourceChainId, targetChainId, bridgeId);
+            } else {
+                axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+            }
         } else {
-            axiomV2QueryAddress = getAxiomV2QueryAddress(sourceChainId);
+            if (sourceChainId in ["1", "11155111", "8453", "84532"]) {
+                axiomV2QueryAddress = getAxiomV2QueryAddress(sourceChainId);
+            } else {
+                axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+            }
         }
 
         let target;
