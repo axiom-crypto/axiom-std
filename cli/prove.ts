@@ -72,7 +72,7 @@ export const prove = async (
                 throw new Error("`targetChainId` is required for blockhash oracle bridge type");
             }
             if (sourceChainId == "1" && targetChainId == "8453") {
-                axiomV2QueryAddress = getAxiomV2QueryBlockhashOracleAddress(sourceChainId, targetChainId);
+                axiomV2QueryAddress = getAxiomV2QueryBlockhashOracleAddress({sourceChainId, targetChainId});
             } else {
                 axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
             }
@@ -84,7 +84,7 @@ export const prove = async (
                 throw new Error("`bridgeId` is required for broadcaster bridge type");
             }
             if (sourceChainId == "1" && targetChainId == "8453") {
-                axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress(sourceChainId, targetChainId, bridgeId);
+                axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress({sourceChainId, targetChainId, bridgeId});
             } else {
                 axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
             }
