@@ -32,14 +32,6 @@ program.command("prove")
 const sdkRs = program.command("sdk-rs")
     .description("Axiom Rust SDK helper commands");
 
-//   sourceChainId: string,
-//   computeResultsJson: string,
-//   callbackTarget: string,
-//   callbackExtraData: string,
-//   maxFeePerGas: string,
-//   callbackGasLimit: string,
-//   overrideAxiomQueryFee: string,
-//   refundee: string,
 sdkRs.command("mock-query-args")
     .description("Generate a mock compute proof")
     .argument("<compute results string>", "compute results as a string")

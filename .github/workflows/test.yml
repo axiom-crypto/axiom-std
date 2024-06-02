@@ -94,12 +94,6 @@ jobs:
       - name: Check forge tree
         run: forge tree
 
-      - name: Debugging - Print current directory
-        run: pwd
-
-      - name: Debugging - List files
-        run: ls -la test/circuit-rs/data
-
       - name: Run Foundry tests
         run: |
           export PROVIDER_URI_SEPOLIA=${{ secrets.PROVIDER_URI_SEPOLIA }}
