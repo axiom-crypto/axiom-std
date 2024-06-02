@@ -23,9 +23,9 @@ contract AxiomStdRsTest is AxiomTest {
 
     function setUp() public {
         _createSelectForkAndSetupAxiom("sepolia", 5_103_100);
-        
-        defaultInput = 
-            Input({ blockNumber: 5146659, _address: uint256(uint160(0xef663bB0e0b1091571DaD9715994bc81e9f5a2ab)) });
+
+        defaultInput =
+            Input({ blockNumber: 5_146_659, _address: uint256(uint160(0xef663bB0e0b1091571DaD9715994bc81e9f5a2ab)) });
         querySchema = axiomVm.readRustCircuit("test/circuit-rs/account_age.rs");
         accountAge = new AccountAge(axiomV2QueryAddress, uint64(block.chainid), querySchema);
 
@@ -37,11 +37,11 @@ contract AxiomStdRsTest is AxiomTest {
         });
     }
 
-    function test_sendQuery() public {
+    function test_rs_sendQuery() public {
         axiomVm.getArgsAndSendQuery(querySchema, abi.encode(defaultInput), address(accountAge));
     }
 
-    function test_sendQueryWithArgs() public {
+    function test_rs_sendQueryWithArgs() public {
         (QueryArgs memory args,) = axiomVm.sendQueryArgs(
             querySchema, abi.encode(defaultInput), address(accountAge), callbackExtraData, feeData
         );
@@ -57,13 +57,13 @@ contract AxiomStdRsTest is AxiomTest {
         );
     }
 
-    function test_callback() public {
+    function test_rs_callback() public {
         axiomVm.prankCallback(
             querySchema, abi.encode(defaultInput), address(accountAge), callbackExtraData, feeData, msg.sender
         );
     }
 
-    function test_callbackWithArgs() public {
+    function test_rs_callbackWithArgs() public {
         FulfillCallbackArgs memory args = axiomVm.fulfillCallbackArgs(
             querySchema, abi.encode(defaultInput), address(accountAge), callbackExtraData, feeData, msg.sender
         );
