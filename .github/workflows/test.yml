@@ -23,7 +23,7 @@ jobs:
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly-2024-01-01
           override: true
 
       - name: Build CLI
@@ -52,7 +52,8 @@ jobs:
         run: |
           export PROVIDER_URI_SEPOLIA=${{ secrets.PROVIDER_URI_SEPOLIA }}
           export PROVIDER_URI_BASE=${{ secrets.PROVIDER_URI_BASE }}
-          RUST_BACKTRACE=1 forge test -vvv
+          export PROVIDER_URI_MAINNET=${{ secrets.PROVIDER_URI_MAINNET }}
+          RUST_BACKTRACE=1 forge test -vvvv
 
   test-mac:
     name: Foundry Tests Mac
@@ -69,7 +70,7 @@ jobs:
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: nightly-2024-01-01
           override: true
 
       - name: Build CLI
@@ -98,4 +99,5 @@ jobs:
         run: |
           export PROVIDER_URI_SEPOLIA=${{ secrets.PROVIDER_URI_SEPOLIA }}
           export PROVIDER_URI_BASE=${{ secrets.PROVIDER_URI_BASE }}
-          RUST_BACKTRACE=1 forge test -vvv
+          export PROVIDER_URI_MAINNET=${{ secrets.PROVIDER_URI_MAINNET }}
+          RUST_BACKTRACE=1 forge test -vvvv
