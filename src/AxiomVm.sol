@@ -548,29 +548,53 @@ contract AxiomVm is Test {
 
     function _runRustCircuit(
         bytes32 querySchema,
-        bytes memory input,
+        bytes memory /* input */,
         address callbackTarget,
         bytes memory callbackExtraData,
         IAxiomV2Query.AxiomV2FeeData memory feeData
     ) internal returns (string memory output) {
-        // TODO: finish this call
-        string[] memory cli = new string[](11);
-        cli[0] = "cargo";
-        cli[1] = "run";
-        cli[2] = "--circuit";
-        cli[3] = "main";
-        cli[4] = "--";
-        cli[5] = "witness-gen";
-        cli[6] = "--input";
-        cli[7] = "data/input.json";
-        cli[8] = "-k";
-        cli[9] = "12";
-        cli[10] = "-p";
+        // Get compute results from Rust circuit
+        string[] memory witnessGen = new string[](15);
+        witnessGen[0] = "cargo";
+        witnessGen[1] = "run";
+        witnessGen[2] = "--manifest-path";
+        witnessGen[3] = "test/circuit-rs/Cargo.toml";
+        witnessGen[4] = "--";
+        witnessGen[5] = "--input";
+        witnessGen[6] = "test/circuit-rs/data/account_age_input.json";
+        witnessGen[7] = "--data-path";
+        witnessGen[8] = "test/circuit-rs/data";
+        witnessGen[9] = "-k";
+        witnessGen[10] = "12";
+        witnessGen[11] = "-p";
+        witnessGen[12] = vm.rpcUrl(urlOrAlias);
+        witnessGen[13] = "--to-stdout";
+        witnessGen[14] = "witness-gen";
 
-        bytes memory axiomOutput = vm.ffi(cli);
-        (string memory logs, string memory errors, string memory build) =
-            abi.decode(axiomOutput, (string, string, string));
-        output = build;
+        bytes memory axiomOutput0 = vm.ffi(witnessGen);
+        string memory computeResults = string(axiomOutput0);
+
+        // Get mock query args
+        string[] memory mockQuery = new string[](13);
+        mockQuery[0] = NODE_PATH;
+        mockQuery[1] = CLI_PATH;
+        mockQuery[2] = "sdk-rs";
+        mockQuery[3] = "mock-query-args";
+        mockQuery[4] = vm.toString(block.chainid);
+        mockQuery[5] = computeResults;
+        mockQuery[6] = vm.toString(querySchema);
+        mockQuery[7] = vm.toString(callbackTarget);
+        mockQuery[8] = vm.toString(callbackExtraData);
+        mockQuery[9] = vm.toString(feeData.maxFeePerGas);
+        mockQuery[10] = vm.toString(feeData.callbackGasLimit);
+        mockQuery[11] = vm.toString(feeData.overrideAxiomQueryFee);
+        mockQuery[12] = vm.toString(msg.sender);
+
+        bytes memory axiomOutput1 = vm.ffi(mockQuery);
+        (, , string memory build1) =
+            abi.decode(axiomOutput1, (string, string, string));
+        compiledStrings[querySchema] = build1;        
+        output = build1;
     }
 
     /**

@@ -161,15 +161,15 @@ var require_compile = __commonJS({
     var utils_12 = require("@axiom-crypto/circuit/cliHandler/utils");
     var utils_22 = require_utils();
     var viem_12 = require("viem");
-    var compile = async (circuitPath, providerUri2, options) => {
+    var compile = async (circuitPath, rpcUrlInput, options) => {
       const { restoreConsole: restoreConsole2, getCaptures: getCaptures2 } = (0, utils_22.redirectConsole)();
       let circuitFunction = "circuit";
       const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
-      const provider2 = (0, utils_12.getProvider)(providerUri2);
+      const rpcUrl2 = (0, utils_12.getRpcUrl)(rpcUrlInput);
       const circuit2 = new js_12.AxiomBaseCircuit({
         f: f.circuit,
         mock: true,
-        provider: provider2,
+        rpcUrl: rpcUrl2,
         shouldTime: false,
         inputSchema: f.inputSchema
       });
@@ -217,10 +217,11 @@ var require_prove = __commonJS({
     var viem_1 = require("viem");
     var client_1 = require("@axiom-crypto/client");
     var utils_3 = require("@axiom-crypto/client/axiom/utils");
-    var prove = async (compiledJson, inputs, providerUri, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
+    var prove = async (compiledJson, inputs, rpcUrl, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
       const { restoreConsole, getCaptures } = (0, utils_2.redirectConsole)();
       const decoder = new TextDecoder();
-      const provider = (0, utils_1.getProvider)(providerUri);
+      const rpcUrlOrCached = (0, utils_1.getRpcUrl)(rpcUrl);
+      const axiomV2QueryAddress = (0, client_1.getAxiomV2QueryAddress)(sourceChainId);
       let compiled = JSON.parse(compiledJson);
       const decodedArray = Buffer.from(compiled.circuit, "base64");
       const raw = decoder.decode(decodedArray);
@@ -228,7 +229,7 @@ var require_prove = __commonJS({
       const circuit = new js_1.AxiomBaseCircuit({
         f: eval(raw),
         mock: true,
-        provider,
+        rpcUrl: rpcUrlOrCached,
         shouldTime: false,
         inputSchema: compiled.inputSchema
       });
@@ -248,7 +249,8 @@ var require_prove = __commonJS({
         };
         let build = await (0, client_1.buildSendQuery)({
           chainId: sourceChainId,
-          providerUri: provider,
+          rpcUrl: rpcUrlOrCached,
+          axiomV2QueryAddress,
           dataQuery: res.dataQuery,
           computeQuery: res.computeQuery,
           callback: {
@@ -288,13 +290,98 @@ var require_prove = __commonJS({
   }
 });
 
+// dist/sdkRs/mockQueryArgs.js
+var require_mockQueryArgs = __commonJS({
+  "dist/sdkRs/mockQueryArgs.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.mockQueryArgs = void 0;
+    var viem_12 = require("viem");
+    var utils_12 = require_utils();
+    var mockQueryArgs = async (sourceChainId2, computeResults, querySchema, callbackTarget2, callbackExtraData2, maxFeePerGas2, callbackGasLimit2, overrideAxiomQueryFee, refundee) => {
+      const { restoreConsole: restoreConsole2, getCaptures: getCaptures2 } = (0, utils_12.redirectConsole)();
+      try {
+        let computeQuery = {
+          k: 13,
+          vkey: [
+            "0x0001000009000100000004010000010080000000000000000000000000000000",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+          ],
+          computeProof: "",
+          resultLen: 0
+        };
+        const parsedComputeResults = JSON.parse(computeResults.replace(/\\n/g, "").trim());
+        computeQuery.resultLen = parsedComputeResults.length;
+        const computeAccumulator = (0, viem_12.concat)([viem_12.zeroHash, viem_12.zeroHash]);
+        const computeProofBytes = "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+        const computeProof = (0, viem_12.concat)([computeAccumulator, ...parsedComputeResults, computeProofBytes]);
+        computeQuery.computeProof = computeProof.toString();
+        const callback = {
+          target: callbackTarget2,
+          extraData: callbackExtraData2
+        };
+        const feeData = {
+          maxFeePerGas: maxFeePerGas2,
+          callbackGasLimit: callbackGasLimit2,
+          overrideAxiomQueryFee
+        };
+        const queryArgs = {
+          args: {
+            sourceChainId: sourceChainId2,
+            dataQueryHash: viem_12.zeroHash,
+            computeQuery,
+            callback,
+            feeData,
+            userSalt: viem_12.zeroHash,
+            refundee,
+            dataQuery: "0x00"
+          },
+          querySchema,
+          queryId: viem_12.zeroHash,
+          computeResults: parsedComputeResults,
+          value: "50000000000000000"
+        };
+        console.log(queryArgs);
+        const logs = getCaptures2();
+        const output = (0, viem_12.encodeAbiParameters)((0, viem_12.parseAbiParameters)("string x, string y, string z"), [logs.logs, logs.errors, JSON.stringify(queryArgs)]);
+        restoreConsole2();
+        console.log(output);
+      } catch (e) {
+        console.error(e);
+        const logs = getCaptures2();
+        const output = (0, viem_12.encodeAbiParameters)((0, viem_12.parseAbiParameters)("string x, string y, string z"), [logs.logs, logs.errors, ""]);
+        restoreConsole2();
+        console.log(output);
+      }
+    };
+    exports2.mockQueryArgs = mockQueryArgs;
+  }
+});
+
 // dist/axiom-std-cli.js
 Object.defineProperty(exports, "__esModule", { value: true });
 var commander_1 = require("commander");
 var compile_1 = require_compile();
 var prove_1 = require_prove();
+var mockQueryArgs_1 = require_mockQueryArgs();
 var program = new commander_1.Command("axiom-std");
 program.name("axiom-std").usage("axiom-std CLI");
 program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<providerUri>", "provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
 program.command("prove").description("Prove a circuit").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<providerUri>", "provider to use").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").action(prove_1.prove);
+var sdkRs = program.command("sdk-rs").description("Axiom Rust SDK helper commands");
+sdkRs.command("mock-query-args").description("Generate a mock compute proof").argument("<compute results string>", "compute results as a string").argument("<query schema>", "query schema").argument("<source chain id>", "source chain id").argument("<callback target>", "callback target").argument("<callback extra data>", "callback extra data").argument("<max fee per gas>", "max fee per gas").argument("<callback gas limit>", "callback gas limit").argument("<override axiom query fee>", "override axiom query fee").argument("<refundee>", "refundee").action(mockQueryArgs_1.mockQueryArgs);
 program.parseAsync(process.argv);
