@@ -20,6 +20,12 @@ jobs:
         with:
           node-version: 18
 
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
       - name: Build CLI
         run: |
           npm install
@@ -60,6 +66,12 @@ jobs:
         with:
           node-version: 18
 
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
       - name: Build CLI
         run: |
           npm install
@@ -81,6 +93,12 @@ jobs:
 
       - name: Check forge tree
         run: forge tree
+
+      - name: Debugging - Print current directory
+        run: pwd
+
+      - name: Debugging - List files
+        run: ls -la test/circuit-rs/data
 
       - name: Run Foundry tests
         run: |
