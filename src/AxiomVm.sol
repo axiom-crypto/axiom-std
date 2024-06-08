@@ -122,16 +122,34 @@ library Axiom {
 /// @dev A contract that provides cheatcodes for testing the AxiomV2Query contract
 contract AxiomVm is Test {
     /// @dev Path to the Axiom CLI
-    string CLI_PATH;
+    string public CLI_PATH;
 
     /// @dev Command to run node scripts
-    string NODE_PATH;
+    string public NODE_PATH;
 
     /// @dev The URL or alias of the JSON RPC provider
-    string urlOrAlias;
+    string public urlOrAlias;
 
     address public axiomV2QueryAddress;
     mapping(bytes32 => string) compiledStrings;
+
+    /// @dev Boolean indicating if the circuit is a Rust circuit
+    bool public isRustCircuit;
+
+    /// @dev Default dummy query schema for Rust circuits
+    bytes32 constant DEFAULT_RUST_QUERY_SCHEMA = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
+
+    /// @dev Path to the manifest file
+    string public manifestPath;
+
+    /// @dev Circuit path for Rust circuits
+    string public rustCircuitPath;
+
+    /// @dev Path to the data directory
+    string public dataPath;
+
+    /// @dev Binary name for Rust circuits
+    string public bin;
 
     constructor(address _axiomV2QueryAddress, string memory _urlOrAlias) {
         axiomV2QueryAddress = _axiomV2QueryAddress;
@@ -251,6 +269,27 @@ contract AxiomVm is Test {
         logOutput("Compile", logs, errors, "Circuit compilation failed");
         querySchema = bytes32(vm.parseJson(build, ".querySchema"));
         compiledStrings[querySchema] = build;
+    }
+
+    /**
+     * @dev Compiles a Rust circuit using the Axiom CLI via FFI
+     * @param _rustCircuitPath path to the Rust circuit file
+     * @return querySchema
+     */
+    function readRustCircuit(
+        string memory _manifestPath,
+        string memory _rustCircuitPath,
+        string memory _dataPath,
+        string memory _bin
+    ) public returns (bytes32 querySchema) {
+        isRustCircuit = true;
+
+        manifestPath = _manifestPath;
+        rustCircuitPath = _rustCircuitPath;
+        dataPath = _dataPath;
+        bin = _bin;
+
+        querySchema = DEFAULT_RUST_QUERY_SCHEMA;
     }
 
     /**
@@ -489,6 +528,20 @@ contract AxiomVm is Test {
         bytes memory callbackExtraData,
         IAxiomV2Query.AxiomV2FeeData memory feeData
     ) internal returns (string memory output) {
+        if (!isRustCircuit) {
+            output = _runJsCircuit(querySchema, input, callbackTarget, callbackExtraData, feeData);
+        } else {
+            output = _runRustCircuit(querySchema, input, callbackTarget, callbackExtraData, feeData);
+        }
+    }
+
+    function _runJsCircuit(
+        bytes32 querySchema,
+        bytes memory input,
+        address callbackTarget,
+        bytes memory callbackExtraData,
+        IAxiomV2Query.AxiomV2FeeData memory feeData
+    ) internal returns (string memory output) {
         require(bytes(compiledStrings[querySchema]).length > 0, "Circuit has not been compiled. Run `compile` first.");
         string[] memory cli = new string[](13);
         cli[0] = NODE_PATH;
@@ -510,6 +563,62 @@ contract AxiomVm is Test {
             abi.decode(axiomOutput, (string, string, string));
         logOutput("Prove", logs, errors, "Circuit proving failed");
         output = build;
+    }
+
+    function _runRustCircuit(
+        bytes32 querySchema,
+        bytes memory, /* input */
+        address callbackTarget,
+        bytes memory callbackExtraData,
+        IAxiomV2Query.AxiomV2FeeData memory feeData
+    ) internal returns (string memory output) {
+        // Get compute results from Rust circuit
+        string[] memory witnessGen = new string[](18);
+
+        witnessGen[0] = "cargo";
+        witnessGen[1] = "+nightly-2024-01-01";
+        witnessGen[2] = "run";
+        witnessGen[3] = "--bin";
+        witnessGen[4] = bin;
+        witnessGen[5] = "--manifest-path";
+        witnessGen[6] = manifestPath; // "test/circuit-rs/Cargo.toml"
+        witnessGen[7] = "--";
+        witnessGen[8] = "--input";
+        witnessGen[9] = rustCircuitPath; // "test/circuit-rs/data/account_age_input.json"
+        witnessGen[10] = "--data-path";
+        witnessGen[11] = dataPath; // "test/circuit-rs/data"
+        witnessGen[12] = "-k";
+        witnessGen[13] = "12";
+        witnessGen[14] = "-p";
+        witnessGen[15] = vm.rpcUrl(urlOrAlias);
+        witnessGen[16] = "--to-stdout";
+        witnessGen[17] = "witness-gen";
+
+        bytes memory axiomOutput0 = vm.ffi(witnessGen);
+        string memory computeResults = string(axiomOutput0);
+
+        console.log("computeResults: ", computeResults);
+
+        // Get mock query args
+        string[] memory mockQuery = new string[](13);
+        mockQuery[0] = NODE_PATH;
+        mockQuery[1] = CLI_PATH;
+        mockQuery[2] = "sdk-rs";
+        mockQuery[3] = "mock-query-args";
+        mockQuery[4] = vm.toString(block.chainid);
+        mockQuery[5] = computeResults;
+        mockQuery[6] = vm.toString(querySchema);
+        mockQuery[7] = vm.toString(callbackTarget);
+        mockQuery[8] = vm.toString(callbackExtraData);
+        mockQuery[9] = vm.toString(feeData.maxFeePerGas);
+        mockQuery[10] = vm.toString(feeData.callbackGasLimit);
+        mockQuery[11] = vm.toString(feeData.overrideAxiomQueryFee);
+        mockQuery[12] = vm.toString(msg.sender);
+
+        bytes memory axiomOutput1 = vm.ffi(mockQuery);
+        (,, string memory build1) = abi.decode(axiomOutput1, (string, string, string));
+        compiledStrings[querySchema] = build1;
+        output = build1;
     }
 
     /**

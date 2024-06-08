@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { compile } from "./compile";
 import { prove } from "./prove";
+import { mockQueryArgs } from "./sdkRs/mockQueryArgs";
 
 const program = new Command("axiom-std");
 
@@ -26,5 +27,22 @@ program.command("prove")
     .argument("<callbackGasLimit>", "callback gas limit")
     .argument("<caller>", "caller")
     .action(prove);
+
+
+const sdkRs = program.command("sdk-rs")
+    .description("Axiom Rust SDK helper commands");
+
+sdkRs.command("mock-query-args")
+    .description("Generate a mock compute proof")
+    .argument("<compute results string>", "compute results as a string")
+    .argument("<query schema>", "query schema")
+    .argument("<source chain id>", "source chain id")
+    .argument("<callback target>", "callback target")
+    .argument("<callback extra data>", "callback extra data")
+    .argument("<max fee per gas>", "max fee per gas")
+    .argument("<callback gas limit>", "callback gas limit")
+    .argument("<override axiom query fee>", "override axiom query fee")
+    .argument("<refundee>", "refundee")
+    .action(mockQueryArgs);
 
 program.parseAsync(process.argv);

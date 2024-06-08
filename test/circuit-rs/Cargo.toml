@@ -1,0 +1,15 @@
+[package]
+name = "circuit-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axiom-sdk = { git = "https://github.com/axiom-crypto/axiom-sdk-rs.git", branch = "feat/axiom-std-2-stdout" }
+axiom-circuit = { git = "https://github.com/axiom-crypto/axiom-sdk-rs.git", branch = "feat/axiom-std-2-stdout" }
+tokio = "1.37.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.111"
+anyhow = "1.0.75"
+rocket = { version = "0.5", features = ["json"] }
+clap = {version = "4.4.7", features = ["derive"]}
+env_logger = "0.9"
