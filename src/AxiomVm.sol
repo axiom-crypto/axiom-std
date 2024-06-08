@@ -139,8 +139,17 @@ contract AxiomVm is Test {
     /// @dev Default dummy query schema for Rust circuits
     bytes32 constant DEFAULT_RUST_QUERY_SCHEMA = 0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef;
 
+    /// @dev Path to the manifest file
+    string public manifestPath;
+
     /// @dev Circuit path for Rust circuits
     string public rustCircuitPath;
+
+    /// @dev Path to the data directory
+    string public dataPath;
+
+    /// @dev Binary name for Rust circuits
+    string public bin;
 
     constructor(address _axiomV2QueryAddress, string memory _urlOrAlias) {
         axiomV2QueryAddress = _axiomV2QueryAddress;
@@ -267,9 +276,19 @@ contract AxiomVm is Test {
      * @param _rustCircuitPath path to the Rust circuit file
      * @return querySchema
      */
-    function readRustCircuit(string memory _rustCircuitPath) public returns (bytes32 querySchema) {
+    function readRustCircuit(
+        string memory _manifestPath,
+        string memory _rustCircuitPath,
+        string memory _dataPath,
+        string memory _bin
+    ) public returns (bytes32 querySchema) {
         isRustCircuit = true;
+
+        manifestPath = _manifestPath;
         rustCircuitPath = _rustCircuitPath;
+        dataPath = _dataPath;
+        bin = _bin;
+
         querySchema = DEFAULT_RUST_QUERY_SCHEMA;
     }
 
@@ -554,23 +573,26 @@ contract AxiomVm is Test {
         IAxiomV2Query.AxiomV2FeeData memory feeData
     ) internal returns (string memory output) {
         // Get compute results from Rust circuit
-        string[] memory witnessGen = new string[](16);
+        string[] memory witnessGen = new string[](18);
+
         witnessGen[0] = "cargo";
         witnessGen[1] = "+nightly-2024-01-01";
         witnessGen[2] = "run";
-        witnessGen[3] = "--manifest-path";
-        witnessGen[4] = "test/circuit-rs/Cargo.toml";
-        witnessGen[5] = "--";
-        witnessGen[6] = "--input";
-        witnessGen[7] = "test/circuit-rs/data/account_age_input.json";
-        witnessGen[8] = "--data-path";
-        witnessGen[9] = "test/circuit-rs/data";
-        witnessGen[10] = "-k";
-        witnessGen[11] = "12";
-        witnessGen[12] = "-p";
-        witnessGen[13] = vm.rpcUrl(urlOrAlias);
-        witnessGen[14] = "--to-stdout";
-        witnessGen[15] = "witness-gen";
+        witnessGen[3] = "--bin";
+        witnessGen[4] = bin;
+        witnessGen[5] = "--manifest-path";
+        witnessGen[6] = manifestPath; // "test/circuit-rs/Cargo.toml"
+        witnessGen[7] = "--";
+        witnessGen[8] = "--input";
+        witnessGen[9] = rustCircuitPath; // "test/circuit-rs/data/account_age_input.json"
+        witnessGen[10] = "--data-path";
+        witnessGen[11] = dataPath; // "test/circuit-rs/data"
+        witnessGen[12] = "-k";
+        witnessGen[13] = "12";
+        witnessGen[14] = "-p";
+        witnessGen[15] = vm.rpcUrl(urlOrAlias);
+        witnessGen[16] = "--to-stdout";
+        witnessGen[17] = "witness-gen";
 
         bytes memory axiomOutput0 = vm.ffi(witnessGen);
         string memory computeResults = string(axiomOutput0);

@@ -26,7 +26,12 @@ contract AxiomStdRsTest is AxiomTest {
 
         defaultInput =
             Input({ blockNumber: 5_146_659, _address: uint256(uint160(0xef663bB0e0b1091571DaD9715994bc81e9f5a2ab)) });
-        querySchema = axiomVm.readRustCircuit("test/circuit-rs/account_age.rs");
+        querySchema = axiomVm.readRustCircuit({
+            _manifestPath: "test/circuit-rs/Cargo.toml",
+            _rustCircuitPath: "test/circuit-rs/data/account_age_input.json",
+            _dataPath: "test/circuit-rs/data",
+            _bin: "circuit-rs"
+        });
         accountAge = new AccountAge(axiomV2QueryAddress, uint64(block.chainid), querySchema);
 
         callbackExtraData = bytes("");
