@@ -597,6 +597,8 @@ contract AxiomVm is Test {
         bytes memory axiomOutput0 = vm.ffi(witnessGen);
         string memory computeResults = string(axiomOutput0);
 
+        console.log("computeResults: ", computeResults);
+
         // Get mock query args
         string[] memory mockQuery = new string[](13);
         mockQuery[0] = NODE_PATH;
