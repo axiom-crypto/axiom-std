@@ -556,7 +556,11 @@ contract AxiomVm is Test {
         cli[3] = compiledStrings[querySchema];
         cli[4] = vm.toString(input);
         cli[5] = vm.rpcUrl(urlOrAlias);
-        cli[6] = vm.toString(block.chainid);
+        if (!isCrosschain) {
+            cli[6] = vm.toString(block.chainid);
+        } else {
+            cli[6] = vm.toString(sourceChainId);
+        }
         cli[7] = vm.toString(callbackTarget);
         cli[8] = vm.toString(callbackExtraData);
         cli[9] = vm.toString(msg.sender);
