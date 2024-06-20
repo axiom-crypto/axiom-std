@@ -1,14 +1,19 @@
 import { AxiomBaseCircuit } from "@axiom-crypto/circuit/js";
-import { getProvider } from "@axiom-crypto/circuit/cliHandler/utils";
+import { getRpcUrl } from "@axiom-crypto/circuit/cliHandler/utils";
 import { getInputs, redirectConsole } from './utils';
 import { encodeAbiParameters, parseAbiParameters } from 'viem';
 import { buildSendQuery } from "@axiom-crypto/client";
 import { argsArrToObj } from '@axiom-crypto/client/axiom/utils';
+import { 
+    getAxiomV2QueryAddress,
+    getAxiomV2QueryBroadcasterAddress,
+    getAxiomV2QueryBlockhashOracleAddress 
+} from '@axiom-crypto/client/lib/address';
 
 export const prove = async (
     compiledJson: string,
     inputs: string,
-    providerUri: string,
+    rpcUrl: string,
     sourceChainId: string,
     callbackTarget: string,
     callbackExtraData: string,
@@ -16,11 +21,16 @@ export const prove = async (
     maxFeePerGas: string,
     callbackGasLimit: string,
     caller: string,
+    targetChainId?: string,
+    bridgeId?: number,
+    broadcaster?: boolean,
+    blockhashOracle?: boolean,
+    targetRpcUrl?: string,
 ) => {
     const { restoreConsole, getCaptures } = redirectConsole();
     const decoder = new TextDecoder();
 
-    const provider = getProvider(providerUri);
+    const rpcUrlOrCache = getRpcUrl(rpcUrl);
     let compiled = JSON.parse(compiledJson);
 
     const decodedArray = Buffer.from(compiled.circuit, 'base64');
@@ -30,7 +40,7 @@ export const prove = async (
     const circuit = new AxiomBaseCircuit({
         f: eval(raw),
         mock: true,
-        provider,
+        rpcUrl: rpcUrlOrCache,
         shouldTime: false,
         inputSchema: compiled.inputSchema,
     })
@@ -53,15 +63,58 @@ export const prove = async (
             dataQuery,
         }
 
+        let axiomV2QueryAddress;
+        if (blockhashOracle) {
+            if (broadcaster) {
+                throw new Error("Cannot use both broadcaster and blockhash oracle");
+            }
+            if (!targetChainId) {
+                throw new Error("`targetChainId` is required for blockhash oracle bridge type");
+            }
+            if (sourceChainId == "1" && targetChainId == "8453") {
+                axiomV2QueryAddress = getAxiomV2QueryBlockhashOracleAddress({sourceChainId, targetChainId});
+            } else {
+                axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+            }
+        } else if (broadcaster) {
+            if (!targetChainId) {
+                throw new Error("`targetChainId` is required for broadcaster bridge type");
+            }
+            if (!bridgeId) {
+                throw new Error("`bridgeId` is required for broadcaster bridge type");
+            }
+            if (false) {
+                axiomV2QueryAddress = getAxiomV2QueryBroadcasterAddress({sourceChainId, targetChainId: targetChainId!, bridgeId: bridgeId!});
+            } else {
+                axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+            }
+        } else {
+            if (sourceChainId in ["1", "11155111", "8453", "84532"]) {
+                axiomV2QueryAddress = getAxiomV2QueryAddress(sourceChainId);
+            } else {
+                axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+            }
+        }
+
+        let target;
+        if (blockhashOracle || broadcaster) {
+            const targetRpcUrlOrCache = getRpcUrl(targetRpcUrl);
+            target = {
+                chainId: targetChainId!,
+                rpcUrl: targetRpcUrlOrCache,
+            };
+        }
         let build = await buildSendQuery({
             chainId: sourceChainId,
-            providerUri: provider,
+            rpcUrl: rpcUrlOrCache,
+            axiomV2QueryAddress,   
             dataQuery: res.dataQuery,
             computeQuery: res.computeQuery,
             callback: {
                 target: callbackTarget,
                 extraData: callbackExtraData,
             },
+            target,
             caller: caller,
             mock: false,
             options: {

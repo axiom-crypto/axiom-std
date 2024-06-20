@@ -85,12 +85,17 @@ library Axiom {
     /// @param self The query to send
     function send(Query memory self) public {
         if (
-            block.chainid == MAINNET_CHAIN_ID || block.chainid == SEPOLIA_CHAIN_ID || block.chainid == BASE_CHAIN_ID
-                || block.chainid == BASE_SEPOLIA_CHAIN_ID
+            !self.axiomVm.isCrosschain()
+                && (
+                    block.chainid == MAINNET_CHAIN_ID || block.chainid == SEPOLIA_CHAIN_ID || block.chainid == BASE_CHAIN_ID
+                        || block.chainid == BASE_SEPOLIA_CHAIN_ID
+                )
         ) {
             self.outputString = self.axiomVm.getArgsAndSendQuery(
                 self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData, self.caller
             );
+        } else if (self.axiomVm.isCrosschain()) {
+            console.log("Query.send() is a no-op: Axiom is not deployed on chain ", block.chainid);
         } else {
             console.log("Query.send() is a no-op: Axiom is not deployed on chain ", block.chainid);
         }
@@ -130,7 +135,25 @@ contract AxiomVm is Test {
     /// @dev The URL or alias of the JSON RPC provider
     string urlOrAlias;
 
+    /// @dev The address of the AxiomV2Query contract
     address public axiomV2QueryAddress;
+
+    /// @dev Whether the contract is a crosschain contract
+    bool public isCrosschain;
+
+    /// @dev The source chain ID
+    uint64 public sourceChainId;
+
+    /// @dev Whether the bridge is via a blockhash oracle
+    bool public isBlockhashOracle;
+
+    /// @dev The bridge ID
+    uint8 public bridgeId;
+
+    /// @dev The JSON-RPC URL or alias for the target chain
+    string public targetUrlOrAlias;
+
+    /// @dev Mapping of querySchema to compiled circuit strings
     mapping(bytes32 => string) compiledStrings;
 
     constructor(address _axiomV2QueryAddress, string memory _urlOrAlias) {
@@ -186,6 +209,28 @@ contract AxiomVm is Test {
             _parseBoolean(string(axiomInputStruct)),
             "AxiomInput struct not found. Make sure that your circuit input struct is named AxiomInput in your test file."
         );
+
+        sourceChainId = uint64(block.chainid);
+    }
+
+    /**
+     * @dev Sets the crosschain settings for the AxiomV2Query contract
+     * @param _sourceChainId the source chain ID
+     * @param _isBlockhashOracle whether the contract is a blockhash oracle
+     * @param _bridgeId the bridge ID
+     * @param _targetUrlOrAlias the JSON-RPC URL or alias for the target chain
+     */
+    function setCrosschainSettings(
+        uint64 _sourceChainId,
+        bool _isBlockhashOracle,
+        uint8 _bridgeId,
+        string calldata _targetUrlOrAlias
+    ) external {
+        isCrosschain = true;
+        sourceChainId = _sourceChainId;
+        isBlockhashOracle = _isBlockhashOracle;
+        bridgeId = _bridgeId;
+        targetUrlOrAlias = _targetUrlOrAlias;
     }
 
     /**
@@ -219,7 +264,7 @@ contract AxiomVm is Test {
         string[] memory cli = new string[](5);
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
-        cli[2] = "readCircuit";
+        cli[2] = "read-circuit";
         cli[3] = _circuitPath;
         cli[4] = vm.rpcUrl(urlOrAlias);
         bytes memory axiomOutput = vm.ffi(cli);
@@ -240,7 +285,7 @@ contract AxiomVm is Test {
         string[] memory cli = new string[](7);
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
-        cli[2] = "readCircuit";
+        cli[2] = "read-circuit";
         cli[3] = _circuitPath;
         cli[4] = vm.rpcUrl(urlOrAlias);
         cli[5] = "--override-query-schema";
@@ -315,8 +360,6 @@ contract AxiomVm is Test {
         IAxiomV2Query.AxiomV2FeeData memory feeData,
         address caller
     ) public view returns (FulfillCallbackArgs memory args) {
-        uint64 sourceChainId = uint64(block.chainid);
-
         QueryArgs memory _query = parseQueryArgs(_queryString);
         args = FulfillCallbackArgs({
             sourceChainId: sourceChainId,
@@ -490,14 +533,34 @@ contract AxiomVm is Test {
         IAxiomV2Query.AxiomV2FeeData memory feeData
     ) internal returns (string memory output) {
         require(bytes(compiledStrings[querySchema]).length > 0, "Circuit has not been compiled. Run `compile` first.");
-        string[] memory cli = new string[](13);
+        string[] memory cli;
+        if (!isCrosschain) {
+            cli = new string[](13);
+        } else {
+            cli = new string[](20);
+            cli[13] = "-t";
+            cli[14] = vm.toString(block.chainid);
+            cli[15] = "-b";
+            cli[16] = vm.toString(bridgeId);
+            if (isBlockhashOracle) {
+                cli[17] = "-bo";
+            } else {
+                cli[17] = "-br";
+            }
+            cli[18] = "-tr";
+            cli[19] = vm.rpcUrl(targetUrlOrAlias);
+        }
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
         cli[2] = "prove";
         cli[3] = compiledStrings[querySchema];
         cli[4] = vm.toString(input);
         cli[5] = vm.rpcUrl(urlOrAlias);
-        cli[6] = vm.toString(block.chainid);
+        if (!isCrosschain) {
+            cli[6] = vm.toString(block.chainid);
+        } else {
+            cli[6] = vm.toString(sourceChainId);
+        }
         cli[7] = vm.toString(callbackTarget);
         cli[8] = vm.toString(callbackExtraData);
         cli[9] = vm.toString(msg.sender);

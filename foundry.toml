@@ -11,6 +11,7 @@ sepolia = "${PROVIDER_URI_SEPOLIA}"
 mainnet = "${PROVIDER_URI_MAINNET}"
 base-sepolia = "${PROVIDER_URI_BASE_SEPOLIA}"
 base = "${PROVIDER_URI_BASE}"
+gnosis = "${PROVIDER_URI_GNOSIS}"
 
 [fmt]
   bracket_spacing = true

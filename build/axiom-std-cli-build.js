@@ -161,15 +161,15 @@ var require_compile = __commonJS({
     var utils_12 = require("@axiom-crypto/circuit/cliHandler/utils");
     var utils_22 = require_utils();
     var viem_12 = require("viem");
-    var compile = async (circuitPath, providerUri2, options) => {
+    var compile = async (circuitPath, rpcUrl2, options) => {
       const { restoreConsole: restoreConsole2, getCaptures: getCaptures2 } = (0, utils_22.redirectConsole)();
       let circuitFunction = "circuit";
       const f = await (0, utils_12.getFunctionFromTs)(circuitPath, circuitFunction);
-      const provider2 = (0, utils_12.getProvider)(providerUri2);
+      const rpcUrlOrCache2 = (0, utils_12.getRpcUrl)(rpcUrl2);
       const circuit2 = new js_12.AxiomBaseCircuit({
         f: f.circuit,
         mock: true,
-        provider: provider2,
+        rpcUrl: rpcUrlOrCache2,
         shouldTime: false,
         inputSchema: f.inputSchema
       });
@@ -217,10 +217,11 @@ var require_prove = __commonJS({
     var viem_1 = require("viem");
     var client_1 = require("@axiom-crypto/client");
     var utils_3 = require("@axiom-crypto/client/axiom/utils");
-    var prove = async (compiledJson, inputs, providerUri, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller) => {
+    var address_1 = require("@axiom-crypto/client/lib/address");
+    var prove = async (compiledJson, inputs, rpcUrl, sourceChainId, callbackTarget, callbackExtraData, refundAddress, maxFeePerGas, callbackGasLimit, caller, targetChainId, bridgeId, broadcaster, blockhashOracle, targetRpcUrl) => {
       const { restoreConsole, getCaptures } = (0, utils_2.redirectConsole)();
       const decoder = new TextDecoder();
-      const provider = (0, utils_1.getProvider)(providerUri);
+      const rpcUrlOrCache = (0, utils_1.getRpcUrl)(rpcUrl);
       let compiled = JSON.parse(compiledJson);
       const decodedArray = Buffer.from(compiled.circuit, "base64");
       const raw = decoder.decode(decodedArray);
@@ -228,7 +229,7 @@ var require_prove = __commonJS({
       const circuit = new js_1.AxiomBaseCircuit({
         f: eval(raw),
         mock: true,
-        provider,
+        rpcUrl: rpcUrlOrCache,
         shouldTime: false,
         inputSchema: compiled.inputSchema
       });
@@ -246,15 +247,57 @@ var require_prove = __commonJS({
           computeResults,
           dataQuery
         };
+        let axiomV2QueryAddress;
+        if (blockhashOracle) {
+          if (broadcaster) {
+            throw new Error("Cannot use both broadcaster and blockhash oracle");
+          }
+          if (!targetChainId) {
+            throw new Error("`targetChainId` is required for blockhash oracle bridge type");
+          }
+          if (sourceChainId == "1" && targetChainId == "8453") {
+            axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBlockhashOracleAddress)({ sourceChainId, targetChainId });
+          } else {
+            axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+          }
+        } else if (broadcaster) {
+          if (!targetChainId) {
+            throw new Error("`targetChainId` is required for broadcaster bridge type");
+          }
+          if (!bridgeId) {
+            throw new Error("`bridgeId` is required for broadcaster bridge type");
+          }
+          if (false) {
+            axiomV2QueryAddress = (0, address_1.getAxiomV2QueryBroadcasterAddress)({ sourceChainId, targetChainId, bridgeId });
+          } else {
+            axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+          }
+        } else {
+          if (sourceChainId in ["1", "11155111", "8453", "84532"]) {
+            axiomV2QueryAddress = (0, address_1.getAxiomV2QueryAddress)(sourceChainId);
+          } else {
+            axiomV2QueryAddress = "0xdEaDBEefDeaDbEefDeAdbeefDeAdbEEfAAaaAAaA";
+          }
+        }
+        let target;
+        if (blockhashOracle || broadcaster) {
+          const targetRpcUrlOrCache = (0, utils_1.getRpcUrl)(targetRpcUrl);
+          target = {
+            chainId: targetChainId,
+            rpcUrl: targetRpcUrlOrCache
+          };
+        }
         let build = await (0, client_1.buildSendQuery)({
           chainId: sourceChainId,
-          providerUri: provider,
+          rpcUrl: rpcUrlOrCache,
+          axiomV2QueryAddress,
           dataQuery: res.dataQuery,
           computeQuery: res.computeQuery,
           callback: {
             target: callbackTarget,
             extraData: callbackExtraData
           },
+          target,
           caller,
           mock: false,
           options: {
@@ -295,6 +338,6 @@ var compile_1 = require_compile();
 var prove_1 = require_prove();
 var program = new commander_1.Command("axiom-std");
 program.name("axiom-std").usage("axiom-std CLI");
-program.command("readCircuit").description("Read and compile a circuit").argument("<circuitPath>", "path to the typescript circuit file").argument("<providerUri>", "provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
-program.command("prove").description("Prove a circuit").argument("<compiledJson>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<providerUri>", "provider to use").argument("<sourceChainId>", "source chain id").argument("<callbackTarget>", "callback target").argument("<callbackExtraData>", "callback extra data").argument("<refundAddress>", "refund address").argument("<maxFeePerGas>", "max fee per gas").argument("<callbackGasLimit>", "callback gas limit").argument("<caller>", "caller").action(prove_1.prove);
+program.command("read-circuit").description("Read and compile a circuit").argument("<circuit-path>", "path to the typescript circuit file").argument("<rpc-url>", "JSON-RPC provider to use").option("-q, --override-query-schema <suffix>", "query schema").action(compile_1.compile);
+program.command("prove").description("Prove a circuit and generate query results").argument("<compiled-json>", "compiled json string").argument("<inputs>", "inputs to the circuit").argument("<rpc-url>", "JSON-RPC provider to use for the source chain").argument("<source-chain-id>", "source chain id").argument("<callback-target>", "callback target").argument("<callback-extra-data>", "callback extra data").argument("<refund-address>", "refund address").argument("<max-fee-per-gas>", "max fee per gas").argument("<callback-gas-limit>", "callback gas limit").argument("<caller>", "caller").option("-t, --target-chain-id <target-chain-id>", "target chain id").option("-b, --bridge-id <bridge-id>", "bridge id", parseInt).option("-br, --broadcaster", "Use crosschain broadcaster").option("-bo, --blockhash-oracle", "Use crosschain blockhash oracle").option("-tr, --target-rpc-url <target-rpc-url>", "JSON-RPC provider to use for the target chain").action(prove_1.prove);
 program.parseAsync(process.argv);
