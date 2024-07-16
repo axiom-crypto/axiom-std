@@ -24,6 +24,9 @@ library AxiomV2Addresses {
     address public constant BASE_SEPOLIA_AXIOM_V2_CORE_MOCK_ADDRESS = 0xB93087Acb2b4dfF8854C01DC661710D6f5FB7a94;
     address public constant BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_ADDRESS = 0xfe059442B0379D5f22Bec384A588766f98A36812;
 
+    address public constant BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_CROSSCHAIN_ADDRESS =
+        0xFa44Fc4CDE68177Bd8212774a09E32d23fA1F41f;
+
     uint256 public constant AXIOM_V2_CORE_DEPLOY_BLOCK = 18_993_287;
     uint256 public constant AXIOM_V2_QUERY_DEPLOY_BLOCK = 19_027_522;
 
@@ -35,6 +38,8 @@ library AxiomV2Addresses {
 
     uint256 public constant BASE_SEPOLIA_AXIOM_V2_CORE_MOCK_DEPLOY_BLOCK = 7_993_784;
     uint256 public constant BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_DEPLOY_BLOCK = 7_994_008;
+
+    uint256 public constant BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_CROSSCHAIN_DEPLOY_BLOCK = 12_094_089;
 
     /// @dev Error returned if the corresponding Axiom V2 contract does not exist for the requested chainId
     error ContractDoesNotExistForChainId();
@@ -111,7 +116,7 @@ library AxiomV2Addresses {
         uint8 bridgeId
     ) public pure returns (address addr) {
         if (targetChainId == BASE_SEPOLIA_CHAIN_ID && sourceChainId == SEPOLIA_CHAIN_ID && isBlockhashOracle) {
-            revert ContractDoesNotExistForChainId();
+            addr = BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_CROSSCHAIN_ADDRESS;
         } else {
             revert ContractDoesNotExistForChainId();
         }
@@ -214,7 +219,7 @@ library AxiomV2Addresses {
         uint8 bridgeId
     ) public pure returns (uint256 blockNumber) {
         if (targetChainId == BASE_SEPOLIA_CHAIN_ID && sourceChainId == SEPOLIA_CHAIN_ID && isBlockhashOracle) {
-            revert ContractDoesNotExistForChainId();
+            blockNumber = BASE_SEPOLIA_AXIOM_V2_QUERY_MOCK_CROSSCHAIN_DEPLOY_BLOCK;
         } else {
             revert ContractDoesNotExistForChainId();
         }
