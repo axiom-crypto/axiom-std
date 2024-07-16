@@ -11,15 +11,15 @@
   "author": "Intrinsic Technologies",
   "license": "MIT",
   "dependencies": {
-    "@axiom-crypto/circuit": "2.1.0-alpha.12",
-    "@axiom-crypto/client": "2.1.0-alpha.12",
+    "@axiom-crypto/circuit": "2.1.0",
+    "@axiom-crypto/client": "2.1.0",
     "commander": "^11.1.0",
     "dotenv": "^16.4.5",
-    "viem": "^2.13.1"
+    "viem": "^2.17.4"
   },
   "devDependencies": {
     "@types/node": "18.15.13",
     "esbuild": "^0.20.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.3"
   }
 }
