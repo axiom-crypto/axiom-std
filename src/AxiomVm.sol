@@ -4,15 +4,11 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
-import { IAxiomV2Query } from "@axiom-crypto/v2-periphery/interfaces/query/IAxiomV2Query.sol";
-import { IAxiomV2Client } from "@axiom-crypto/v2-periphery/interfaces/client/IAxiomV2Client.sol";
-import {
-    AxiomV2Addresses,
-    MAINNET_CHAIN_ID,
-    SEPOLIA_CHAIN_ID,
-} from "./AxiomV2Addresses.sol";
+import {IAxiomV2Query} from "@axiom-crypto/v2-periphery/interfaces/query/IAxiomV2Query.sol";
+import {IAxiomV2Client} from "@axiom-crypto/v2-periphery/interfaces/client/IAxiomV2Client.sol";
+import {AxiomV2Addresses, MAINNET_CHAIN_ID, SEPOLIA_CHAIN_ID} from "./AxiomV2Addresses.sol";
 
-import { AxiomCli } from "./AxiomCli.sol";
+import {AxiomCli} from "./AxiomCli.sol";
 
 /// @dev Arguments for constructing a query into Axiom
 /// @param sourceChainId The chain ID of the chain that the query is being sent from
@@ -82,21 +78,39 @@ library Axiom {
     /// @dev Sends a query to Axiom, is a no-op if Axiom is not deployed on the current chain
     /// @param self The query to send
     function send(Query memory self) public {
-        if (block.chainid == MAINNET_CHAIN_ID || block.chainid == SEPOLIA_CHAIN_ID) {
+        if (
+            block.chainid == MAINNET_CHAIN_ID ||
+            block.chainid == SEPOLIA_CHAIN_ID
+        ) {
             self.outputString = self.axiomVm.getArgsAndSendQuery(
-                self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData, self.caller
+                self.querySchema,
+                self.input,
+                self.callbackTarget,
+                self.callbackExtraData,
+                self.feeData,
+                self.caller
             );
         } else {
-            console.log("Query.send() is a no-op: Axiom is not deployed on chain ", block.chainid);
+            console.log(
+                "Query.send() is a no-op: Axiom is not deployed on chain ",
+                block.chainid
+            );
         }
     }
 
     /// @dev Pranks a callback from Axiom
     /// @param self The query to fulfill the callback for
     /// @return results The results of the query
-    function prankFulfill(Query memory self) public returns (bytes32[] memory results) {
+    function prankFulfill(
+        Query memory self
+    ) public returns (bytes32[] memory results) {
         FulfillCallbackArgs memory args = self.axiomVm.fulfillCallbackArgs(
-            self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData, self.caller
+            self.querySchema,
+            self.input,
+            self.callbackTarget,
+            self.callbackExtraData,
+            self.feeData,
+            self.caller
         );
         self.axiomVm.prankCallback(args);
         results = args.axiomResults;
@@ -105,9 +119,16 @@ library Axiom {
     /// @dev Returns results from a callback to Axiom, without pranking the fulfillment
     /// @param self The query to peek results for
     /// @return results The results of the query
-    function peekResults(Query memory self) public returns (bytes32[] memory results) {
+    function peekResults(
+        Query memory self
+    ) public returns (bytes32[] memory results) {
         FulfillCallbackArgs memory args = self.axiomVm.fulfillCallbackArgs(
-            self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData, self.caller
+            self.querySchema,
+            self.input,
+            self.callbackTarget,
+            self.callbackExtraData,
+            self.feeData,
+            self.caller
         );
         results = args.axiomResults;
     }
@@ -143,7 +164,10 @@ contract AxiomVm is Test {
         checkNpm[1] = "-c";
         checkNpm[2] = "command -v npm >/dev/null 2>&1 && echo 1 || echo 0";
         bytes memory npmOutput = vm.ffi(checkNpm);
-        require(_parseBoolean(string(npmOutput)), "NPM is required to run tests. Please install NPM and try again ");
+        require(
+            _parseBoolean(string(npmOutput)),
+            "NPM is required to run tests. Please install NPM and try again "
+        );
         NODE_PATH = "node";
 
         string[] memory getDirectory = new string[](3);
@@ -155,7 +179,13 @@ contract AxiomVm is Test {
         string[] memory bunInstall = new string[](3);
         bunInstall[0] = "sh";
         bunInstall[1] = "-c";
-        bunInstall[2] = string(abi.encodePacked("cd ", string(directory), " && npm install 2>/dev/null"));
+        bunInstall[2] = string(
+            abi.encodePacked(
+                "cd ",
+                string(directory),
+                " && npm install 2>/dev/null"
+            )
+        );
         vm.ffi(bunInstall);
 
         string[] memory cliPathFind = new string[](4);
@@ -170,18 +200,22 @@ contract AxiomVm is Test {
         string[] memory checkCli = new string[](3);
         checkCli[0] = "sh";
         checkCli[1] = "-c";
-        checkCli[2] = string(abi.encodePacked("shasum -a 256 ", CLI_PATH, " | awk '{print $1}'"));
+        checkCli[2] = string(
+            abi.encodePacked("shasum -a 256 ", CLI_PATH, " | awk '{print $1}'")
+        );
         bytes memory sha = vm.ffi(checkCli);
         require(
-            keccak256(abi.encodePacked(sha)) == keccak256(abi.encodePacked(AxiomCli.CLI_SHASUM)),
+            keccak256(abi.encodePacked(sha)) ==
+                keccak256(abi.encodePacked(AxiomCli.CLI_SHASUM)),
             "Wrong CLI shasum. Make sure that there are no conflicting axiom-vm-cli.bin files in your folder."
         );
 
         string[] memory checkAxiomInputStruct = new string[](3);
         checkAxiomInputStruct[0] = "sh";
         checkAxiomInputStruct[1] = "-c";
-        checkAxiomInputStruct[2] =
-            "grep -rl \"AxiomInput\\\"\" . --include \\*.json >/dev/null 2>&1 && echo 1 || echo 0";
+        checkAxiomInputStruct[
+            2
+        ] = 'grep -rl "AxiomInput\\"" . --include \\*.json >/dev/null 2>&1 && echo 1 || echo 0';
         bytes memory axiomInputStruct = vm.ffi(checkAxiomInputStruct);
         require(
             _parseBoolean(string(axiomInputStruct)),
@@ -198,10 +232,12 @@ contract AxiomVm is Test {
      * @param errors any errors from ffi to log
      * @param message the revert message
      */
-    function logOutput(string memory phase, string memory logs, string memory errors, string memory message)
-        public
-        view
-    {
+    function logOutput(
+        string memory phase,
+        string memory logs,
+        string memory errors,
+        string memory message
+    ) public view {
         if (bytes(logs).length > 0) {
             console.log(string.concat(phase, " - Circuit stdout:"));
             console.log(logs);
@@ -218,7 +254,9 @@ contract AxiomVm is Test {
      * @param _circuitPath path to the circuit file
      * @return querySchema
      */
-    function readCircuit(string memory _circuitPath) public returns (bytes32 querySchema) {
+    function readCircuit(
+        string memory _circuitPath
+    ) public returns (bytes32 querySchema) {
         string[] memory cli = new string[](5);
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
@@ -226,8 +264,8 @@ contract AxiomVm is Test {
         cli[3] = _circuitPath;
         cli[4] = vm.rpcUrl(urlOrAlias);
         bytes memory axiomOutput = vm.ffi(cli);
-        (string memory logs, string memory errors, string memory build) =
-            abi.decode(axiomOutput, (string, string, string));
+        (string memory logs, string memory errors, string memory build) = abi
+            .decode(axiomOutput, (string, string, string));
         logOutput("Compile", logs, errors, "Circuit compilation failed");
         querySchema = bytes32(vm.parseJson(build, ".querySchema"));
         compiledStrings[querySchema] = build;
@@ -239,7 +277,10 @@ contract AxiomVm is Test {
      * @param suffix the suffix to append to the query schema
      * @return querySchema
      */
-    function readCircuit(string memory _circuitPath, string memory suffix) public returns (bytes32 querySchema) {
+    function readCircuit(
+        string memory _circuitPath,
+        string memory suffix
+    ) public returns (bytes32 querySchema) {
         string[] memory cli = new string[](7);
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
@@ -249,8 +290,8 @@ contract AxiomVm is Test {
         cli[5] = "--override-query-schema";
         cli[6] = suffix;
         bytes memory axiomOutput = vm.ffi(cli);
-        (string memory logs, string memory errors, string memory build) =
-            abi.decode(axiomOutput, (string, string, string));
+        (string memory logs, string memory errors, string memory build) = abi
+            .decode(axiomOutput, (string, string, string));
         logOutput("Compile", logs, errors, "Circuit compilation failed");
         querySchema = bytes32(vm.parseJson(build, ".querySchema"));
         compiledStrings[querySchema] = build;
@@ -273,7 +314,13 @@ contract AxiomVm is Test {
         bytes memory callbackExtraData,
         IAxiomV2Query.AxiomV2FeeData memory feeData
     ) public returns (QueryArgs memory args, string memory queryString) {
-        queryString = _run(querySchema, input, callbackTarget, callbackExtraData, feeData);
+        queryString = _run(
+            querySchema,
+            input,
+            callbackTarget,
+            callbackExtraData,
+            feeData
+        );
         args = parseQueryArgs(queryString);
     }
 
@@ -285,18 +332,27 @@ contract AxiomVm is Test {
      * @return args the sendQuery args
      * @return queryString the query string
      */
-    function sendQueryArgs(bytes32 querySchema, bytes memory input, address callbackTarget)
-        public
-        returns (QueryArgs memory args, string memory queryString)
-    {
+    function sendQueryArgs(
+        bytes32 querySchema,
+        bytes memory input,
+        address callbackTarget
+    ) public returns (QueryArgs memory args, string memory queryString) {
         uint64 maxFeePerGas = 25 gwei;
-        IAxiomV2Query.AxiomV2FeeData memory feeData = IAxiomV2Query.AxiomV2FeeData({
-            maxFeePerGas: maxFeePerGas,
-            callbackGasLimit: 1_000_000,
-            overrideAxiomQueryFee: 0
-        });
+        IAxiomV2Query.AxiomV2FeeData memory feeData = IAxiomV2Query
+            .AxiomV2FeeData({
+                maxFeePerGas: maxFeePerGas,
+                callbackGasLimit: 1_000_000,
+                overrideAxiomQueryFee: 0
+            });
         bytes memory callbackExtraData = bytes("");
-        return sendQueryArgs(querySchema, input, callbackTarget, callbackExtraData, feeData);
+        return
+            sendQueryArgs(
+                querySchema,
+                input,
+                callbackTarget,
+                callbackExtraData,
+                feeData
+            );
     }
 
     /**
@@ -319,9 +375,15 @@ contract AxiomVm is Test {
         args = FulfillCallbackArgs({
             sourceChainId: sourceChainId,
             caller: caller,
-            querySchema: abi.decode(vm.parseJson(compiledStrings[querySchema], ".querySchema"), (bytes32)),
+            querySchema: abi.decode(
+                vm.parseJson(compiledStrings[querySchema], ".querySchema"),
+                (bytes32)
+            ),
             queryId: vm.parseJsonUint(_queryString, ".queryId"),
-            axiomResults: abi.decode(vm.parseJson(_queryString, ".computeResults"), (bytes32[])),
+            axiomResults: abi.decode(
+                vm.parseJson(_queryString, ".computeResults"),
+                (bytes32[])
+            ),
             callbackExtraData: _query.callback.extraData,
             gasLimit: feeData.callbackGasLimit,
             callbackTarget: callbackTarget
@@ -346,8 +408,21 @@ contract AxiomVm is Test {
         IAxiomV2Query.AxiomV2FeeData memory feeData,
         address caller
     ) public returns (FulfillCallbackArgs memory args) {
-        string memory queryString = _run(querySchema, input, callbackTarget, callbackExtraData, feeData);
-        return fulfillCallbackArgs(querySchema, queryString, callbackTarget, feeData, caller);
+        string memory queryString = _run(
+            querySchema,
+            input,
+            callbackTarget,
+            callbackExtraData,
+            feeData
+        );
+        return
+            fulfillCallbackArgs(
+                querySchema,
+                queryString,
+                callbackTarget,
+                feeData,
+                caller
+            );
     }
 
     /**
@@ -356,8 +431,13 @@ contract AxiomVm is Test {
      */
     function prankCallback(FulfillCallbackArgs memory args) public {
         vm.prank(axiomV2QueryAddress);
-        IAxiomV2Client(args.callbackTarget).axiomV2Callback{ gas: args.gasLimit }(
-            args.sourceChainId, args.caller, args.querySchema, args.queryId, args.axiomResults, args.callbackExtraData
+        IAxiomV2Client(args.callbackTarget).axiomV2Callback{gas: args.gasLimit}(
+            args.sourceChainId,
+            args.caller,
+            args.querySchema,
+            args.queryId,
+            args.axiomResults,
+            args.callbackExtraData
         );
     }
 
@@ -378,8 +458,14 @@ contract AxiomVm is Test {
         IAxiomV2Query.AxiomV2FeeData memory feeData,
         address caller
     ) public {
-        FulfillCallbackArgs memory args =
-            fulfillCallbackArgs(querySchema, input, callbackTarget, callbackExtraData, feeData, caller);
+        FulfillCallbackArgs memory args = fulfillCallbackArgs(
+            querySchema,
+            input,
+            callbackTarget,
+            callbackExtraData,
+            feeData,
+            caller
+        );
         prankCallback(args);
     }
 
@@ -389,8 +475,15 @@ contract AxiomVm is Test {
      */
     function prankOffchainCallback(FulfillCallbackArgs memory args) public {
         vm.prank(axiomV2QueryAddress);
-        IAxiomV2Client(args.callbackTarget).axiomV2OffchainCallback{ gas: args.gasLimit }(
-            args.sourceChainId, args.caller, args.querySchema, args.queryId, args.axiomResults, args.callbackExtraData
+        IAxiomV2Client(args.callbackTarget).axiomV2OffchainCallback{
+            gas: args.gasLimit
+        }(
+            args.sourceChainId,
+            args.caller,
+            args.querySchema,
+            args.queryId,
+            args.axiomResults,
+            args.callbackExtraData
         );
     }
 
@@ -411,8 +504,14 @@ contract AxiomVm is Test {
         IAxiomV2Query.AxiomV2FeeData memory feeData,
         address caller
     ) public {
-        FulfillCallbackArgs memory args =
-            fulfillCallbackArgs(querySchema, input, callbackTarget, callbackExtraData, feeData, caller);
+        FulfillCallbackArgs memory args = fulfillCallbackArgs(
+            querySchema,
+            input,
+            callbackTarget,
+            callbackExtraData,
+            feeData,
+            caller
+        );
         prankOffchainCallback(args);
     }
 
@@ -423,14 +522,19 @@ contract AxiomVm is Test {
      * @param callbackTarget the callback contract address
      * @return queryString the query string
      */
-    function getArgsAndSendQuery(bytes32 querySchema, bytes memory input, address callbackTarget)
-        public
-        returns (string memory queryString)
-    {
-        (QueryArgs memory args, string memory _queryString) = sendQueryArgs(querySchema, input, callbackTarget);
+    function getArgsAndSendQuery(
+        bytes32 querySchema,
+        bytes memory input,
+        address callbackTarget
+    ) public returns (string memory queryString) {
+        (QueryArgs memory args, string memory _queryString) = sendQueryArgs(
+            querySchema,
+            input,
+            callbackTarget
+        );
         queryString = _queryString;
         vm.prank(msg.sender);
-        IAxiomV2Query(axiomV2QueryAddress).sendQuery{ value: args.value }(
+        IAxiomV2Query(axiomV2QueryAddress).sendQuery{value: args.value}(
             args.sourceChainId,
             args.dataQueryHash,
             args.computeQuery,
@@ -460,11 +564,16 @@ contract AxiomVm is Test {
         IAxiomV2Query.AxiomV2FeeData memory feeData,
         address caller
     ) public returns (string memory queryString) {
-        (QueryArgs memory args, string memory _queryString) =
-            sendQueryArgs(querySchema, input, callbackTarget, callbackExtraData, feeData);
+        (QueryArgs memory args, string memory _queryString) = sendQueryArgs(
+            querySchema,
+            input,
+            callbackTarget,
+            callbackExtraData,
+            feeData
+        );
         queryString = _queryString;
         vm.prank(caller);
-        IAxiomV2Query(axiomV2QueryAddress).sendQuery{ value: args.value }(
+        IAxiomV2Query(axiomV2QueryAddress).sendQuery{value: args.value}(
             args.sourceChainId,
             args.dataQueryHash,
             args.computeQuery,
@@ -487,8 +596,11 @@ contract AxiomVm is Test {
         bytes memory callbackExtraData,
         IAxiomV2Query.AxiomV2FeeData memory feeData
     ) internal returns (string memory output) {
-        require(bytes(compiledStrings[querySchema]).length > 0, "Circuit has not been compiled. Run `compile` first.");
-        string[] memory cli;
+        require(
+            bytes(compiledStrings[querySchema]).length > 0,
+            "Circuit has not been compiled. Run `compile` first."
+        );
+        string[] memory cli = new string[](13);
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
         cli[2] = "prove";
@@ -502,11 +614,10 @@ contract AxiomVm is Test {
         cli[10] = vm.toString(feeData.maxFeePerGas);
         cli[11] = vm.toString(feeData.callbackGasLimit);
         cli[12] = vm.toString(msg.sender);
-        cli = new string[](13);
 
         bytes memory axiomOutput = vm.ffi(cli);
-        (string memory logs, string memory errors, string memory build) =
-            abi.decode(axiomOutput, (string, string, string));
+        (string memory logs, string memory errors, string memory build) = abi
+            .decode(axiomOutput, (string, string, string));
         logOutput("Prove", logs, errors, "Circuit proving failed");
         output = build;
     }
@@ -516,21 +627,51 @@ contract AxiomVm is Test {
      * @param _queryString the string output from the CLI
      * @return args the AxiomQuery
      */
-    function parseQueryArgs(string memory _queryString) public pure returns (QueryArgs memory args) {
-        args.sourceChainId = uint64(vm.parseJsonUint(_queryString, ".args.sourceChainId"));
-        args.dataQueryHash = vm.parseJsonBytes32(_queryString, ".args.dataQueryHash");
+    function parseQueryArgs(
+        string memory _queryString
+    ) public pure returns (QueryArgs memory args) {
+        args.sourceChainId = uint64(
+            vm.parseJsonUint(_queryString, ".args.sourceChainId")
+        );
+        args.dataQueryHash = vm.parseJsonBytes32(
+            _queryString,
+            ".args.dataQueryHash"
+        );
 
-        args.computeQuery.k = uint8(vm.parseJsonUint(_queryString, ".args.computeQuery.k"));
-        args.computeQuery.resultLen = uint16(vm.parseJsonUint(_queryString, ".args.computeQuery.resultLen"));
-        args.computeQuery.vkey = vm.parseJsonBytes32Array(_queryString, ".args.computeQuery.vkey");
-        args.computeQuery.computeProof = vm.parseJsonBytes(_queryString, ".args.computeQuery.computeProof");
+        args.computeQuery.k = uint8(
+            vm.parseJsonUint(_queryString, ".args.computeQuery.k")
+        );
+        args.computeQuery.resultLen = uint16(
+            vm.parseJsonUint(_queryString, ".args.computeQuery.resultLen")
+        );
+        args.computeQuery.vkey = vm.parseJsonBytes32Array(
+            _queryString,
+            ".args.computeQuery.vkey"
+        );
+        args.computeQuery.computeProof = vm.parseJsonBytes(
+            _queryString,
+            ".args.computeQuery.computeProof"
+        );
 
-        args.callback.target = vm.parseJsonAddress(_queryString, ".args.callback.target");
-        args.callback.extraData = vm.parseJsonBytes(_queryString, ".args.callback.extraData");
+        args.callback.target = vm.parseJsonAddress(
+            _queryString,
+            ".args.callback.target"
+        );
+        args.callback.extraData = vm.parseJsonBytes(
+            _queryString,
+            ".args.callback.extraData"
+        );
 
-        args.feeData.maxFeePerGas = uint64(vm.parseJsonUint(_queryString, ".args.feeData.maxFeePerGas"));
-        args.feeData.callbackGasLimit = uint32(vm.parseJsonUint(_queryString, ".args.feeData.callbackGasLimit"));
-        args.feeData.overrideAxiomQueryFee = vm.parseJsonUint(_queryString, ".args.feeData.overrideAxiomQueryFee");
+        args.feeData.maxFeePerGas = uint64(
+            vm.parseJsonUint(_queryString, ".args.feeData.maxFeePerGas")
+        );
+        args.feeData.callbackGasLimit = uint32(
+            vm.parseJsonUint(_queryString, ".args.feeData.callbackGasLimit")
+        );
+        args.feeData.overrideAxiomQueryFee = vm.parseJsonUint(
+            _queryString,
+            ".args.feeData.overrideAxiomQueryFee"
+        );
 
         args.userSalt = vm.parseJsonBytes32(_queryString, ".args.userSalt");
         args.refundee = vm.parseJsonAddress(_queryString, ".args.refundee");
