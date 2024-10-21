@@ -25,11 +25,6 @@ program.command("prove")
     .argument("<max-fee-per-gas>", "max fee per gas")
     .argument("<callback-gas-limit>", "callback gas limit")
     .argument("<caller>", "caller")
-    .option("-t, --target-chain-id <target-chain-id>", "target chain id")
-    .option("-b, --bridge-id <bridge-id>", "bridge id", parseInt)
-    .option("-br, --broadcaster", "Use crosschain broadcaster")
-    .option("-bo, --blockhash-oracle", "Use crosschain blockhash oracle")
-    .option("-tr, --target-rpc-url <target-rpc-url>", "JSON-RPC provider to use for the target chain")    
     .action(prove);
 
 program.parseAsync(process.argv);

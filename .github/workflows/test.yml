@@ -46,7 +46,6 @@ jobs:
         run: |
           export PROVIDER_URI_MAINNET=${{ secrets.PROVIDER_URI_MAINNET }}
           export PROVIDER_URI_SEPOLIA=${{ secrets.PROVIDER_URI_SEPOLIA }}
-          export PROVIDER_URI_BASE=${{ secrets.PROVIDER_URI_BASE }}
           export PROVIDER_URI_GNOSIS=${{ secrets.PROVIDER_URI_GNOSIS }}
           RUST_BACKTRACE=1 forge test -vvv
 
@@ -88,6 +87,5 @@ jobs:
         run: |
           export PROVIDER_URI_MAINNET=${{ secrets.PROVIDER_URI_MAINNET }}
           export PROVIDER_URI_SEPOLIA=${{ secrets.PROVIDER_URI_SEPOLIA }}
-          export PROVIDER_URI_BASE=${{ secrets.PROVIDER_URI_BASE }}
           export PROVIDER_URI_GNOSIS=${{ secrets.PROVIDER_URI_GNOSIS }}
           RUST_BACKTRACE=1 forge test -vvv

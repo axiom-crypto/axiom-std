@@ -10,8 +10,6 @@ import {
     AxiomV2Addresses,
     MAINNET_CHAIN_ID,
     SEPOLIA_CHAIN_ID,
-    BASE_CHAIN_ID,
-    BASE_SEPOLIA_CHAIN_ID
 } from "./AxiomV2Addresses.sol";
 
 import { AxiomCli } from "./AxiomCli.sol";
@@ -84,18 +82,10 @@ library Axiom {
     /// @dev Sends a query to Axiom, is a no-op if Axiom is not deployed on the current chain
     /// @param self The query to send
     function send(Query memory self) public {
-        if (
-            !self.axiomVm.isCrosschain()
-                && (
-                    block.chainid == MAINNET_CHAIN_ID || block.chainid == SEPOLIA_CHAIN_ID || block.chainid == BASE_CHAIN_ID
-                        || block.chainid == BASE_SEPOLIA_CHAIN_ID
-                )
-        ) {
+        if (block.chainid == MAINNET_CHAIN_ID || block.chainid == SEPOLIA_CHAIN_ID) {
             self.outputString = self.axiomVm.getArgsAndSendQuery(
                 self.querySchema, self.input, self.callbackTarget, self.callbackExtraData, self.feeData, self.caller
             );
-        } else if (self.axiomVm.isCrosschain()) {
-            console.log("Query.send() is a no-op: Axiom is not deployed on chain ", block.chainid);
         } else {
             console.log("Query.send() is a no-op: Axiom is not deployed on chain ", block.chainid);
         }
@@ -138,20 +128,8 @@ contract AxiomVm is Test {
     /// @dev The address of the AxiomV2Query contract
     address public axiomV2QueryAddress;
 
-    /// @dev Whether the contract is a crosschain contract
-    bool public isCrosschain;
-
     /// @dev The source chain ID
     uint64 public sourceChainId;
-
-    /// @dev Whether the bridge is via a blockhash oracle
-    bool public isBlockhashOracle;
-
-    /// @dev The bridge ID
-    uint8 public bridgeId;
-
-    /// @dev The JSON-RPC URL or alias for the target chain
-    string public targetUrlOrAlias;
 
     /// @dev Mapping of querySchema to compiled circuit strings
     mapping(bytes32 => string) compiledStrings;
@@ -211,26 +189,6 @@ contract AxiomVm is Test {
         );
 
         sourceChainId = uint64(block.chainid);
-    }
-
-    /**
-     * @dev Sets the crosschain settings for the AxiomV2Query contract
-     * @param _sourceChainId the source chain ID
-     * @param _isBlockhashOracle whether the contract is a blockhash oracle
-     * @param _bridgeId the bridge ID
-     * @param _targetUrlOrAlias the JSON-RPC URL or alias for the target chain
-     */
-    function setCrosschainSettings(
-        uint64 _sourceChainId,
-        bool _isBlockhashOracle,
-        uint8 _bridgeId,
-        string calldata _targetUrlOrAlias
-    ) external {
-        isCrosschain = true;
-        sourceChainId = _sourceChainId;
-        isBlockhashOracle = _isBlockhashOracle;
-        bridgeId = _bridgeId;
-        targetUrlOrAlias = _targetUrlOrAlias;
     }
 
     /**
@@ -332,9 +290,6 @@ contract AxiomVm is Test {
         returns (QueryArgs memory args, string memory queryString)
     {
         uint64 maxFeePerGas = 25 gwei;
-        if (block.chainid == BASE_CHAIN_ID || block.chainid == BASE_SEPOLIA_CHAIN_ID) {
-            maxFeePerGas = 0.75 gwei;
-        }
         IAxiomV2Query.AxiomV2FeeData memory feeData = IAxiomV2Query.AxiomV2FeeData({
             maxFeePerGas: maxFeePerGas,
             callbackGasLimit: 1_000_000,
@@ -534,39 +489,20 @@ contract AxiomVm is Test {
     ) internal returns (string memory output) {
         require(bytes(compiledStrings[querySchema]).length > 0, "Circuit has not been compiled. Run `compile` first.");
         string[] memory cli;
-        if (!isCrosschain) {
-            cli = new string[](13);
-        } else {
-            cli = new string[](20);
-            cli[13] = "-t";
-            cli[14] = vm.toString(block.chainid);
-            cli[15] = "-b";
-            cli[16] = vm.toString(bridgeId);
-            if (isBlockhashOracle) {
-                cli[17] = "-bo";
-            } else {
-                cli[17] = "-br";
-            }
-            cli[18] = "-tr";
-            cli[19] = vm.rpcUrl(targetUrlOrAlias);
-        }
         cli[0] = NODE_PATH;
         cli[1] = CLI_PATH;
         cli[2] = "prove";
         cli[3] = compiledStrings[querySchema];
         cli[4] = vm.toString(input);
         cli[5] = vm.rpcUrl(urlOrAlias);
-        if (!isCrosschain) {
-            cli[6] = vm.toString(block.chainid);
-        } else {
-            cli[6] = vm.toString(sourceChainId);
-        }
+        cli[6] = vm.toString(sourceChainId);
         cli[7] = vm.toString(callbackTarget);
         cli[8] = vm.toString(callbackExtraData);
         cli[9] = vm.toString(msg.sender);
         cli[10] = vm.toString(feeData.maxFeePerGas);
         cli[11] = vm.toString(feeData.callbackGasLimit);
         cli[12] = vm.toString(msg.sender);
+        cli = new string[](13);
 
         bytes memory axiomOutput = vm.ffi(cli);
         (string memory logs, string memory errors, string memory build) =
